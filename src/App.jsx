@@ -1,123 +1,375 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight,
+  TrendingUp,
+  Activity,
+  GitBranch,
+  Server,
+  Database,
+  Globe,
+  Code2,
+  Cpu,
+  Zap,
+  MessageSquare,
+  ShieldCheck,
+  Layout,
+  Smartphone,
+  CheckCircle2,
   Menu,
   X,
-  Zap,
-  Rocket,
+  ArrowUpRight,
+  Terminal,
   Layers,
-  CheckCircle2,
-  Mail,
-  Globe,
-  Shield,
-  ChevronDown,
-  Code,
-  Cpu,
-  Smartphone
+  PenTool,
+  Wrench
 } from 'lucide-react';
 
-// --- Safe 3D Rocket Component (Pure CSS - Crash Proof) ---
+// --- UTILS: SCROLL OBSERVER ---
+const useOnScreen = (options) => {
+  const ref = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
 
-const CssRocket = () => {
+  useEffect(() => {
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        setIsVisible(true);
+        observer.disconnect(); // Trigger once
+      }
+    }, options);
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+    return () => observer.disconnect();
+  }, [ref, options]);
+
+  return [ref, isVisible];
+};
+
+const FadeIn = ({ children, delay = 0, className = "" }) => {
+  const [ref, isVisible] = useOnScreen({ threshold: 0.1 });
+
   return (
-    <div className="relative w-full h-full flex items-center justify-center perspective-1000">
-      {/* Glow Effect Background */}
-      <div className="absolute w-64 h-64 bg-orange-500/20 blur-[80px] rounded-full animate-pulse" />
-
-      {/* Rocket Container with Float Animation */}
-      <div className="relative w-48 h-80 animate-[float_6s_ease-in-out_infinite] z-10">
-
-        {/* Rocket SVG */}
-        <svg viewBox="0 0 200 400" className="w-full h-full drop-shadow-2xl filter">
-          <defs>
-            <linearGradient id="rocketBody" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#f3f4f6" /> {/* Gray-100 */}
-              <stop offset="50%" stopColor="#e5e7eb" /> {/* Gray-200 */}
-              <stop offset="100%" stopColor="#d1d5db" /> {/* Gray-300 */}
-            </linearGradient>
-            <linearGradient id="rocketFin" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" stopColor="#f97316" /> {/* Orange-500 */}
-              <stop offset="100%" stopColor="#dc2626" /> {/* Red-600 - matching text gradient */}
-            </linearGradient>
-            <linearGradient id="windowGlass" x1="0%" y1="0%" x2="0%" y2="100%">
-              <stop offset="0%" stopColor="#38bdf8" />
-              <stop offset="100%" stopColor="#0284c7" />
-            </linearGradient>
-          </defs>
-
-          {/* Left Fin */}
-          <path d="M40 280 L0 360 L50 340 Z" fill="url(#rocketFin)" />
-
-          {/* Right Fin */}
-          <path d="M160 280 L200 360 L150 340 Z" fill="url(#rocketFin)" />
-
-          {/* Main Body */}
-          <path d="M100 40 C100 40 160 120 160 280 L100 300 L40 280 C40 120 100 40 100 40 Z" fill="url(#rocketBody)" />
-
-          {/* Body details/seams */}
-          <path d="M40 280 Q100 320 160 280" fill="none" stroke="#9ca3af" strokeWidth="1" />
-
-          {/* Center Fin/Spine */}
-          <rect x="98" y="150" width="4" height="140" fill="#9ca3af" opacity="0.5" />
-
-          {/* Window */}
-          <circle cx="100" cy="140" r="25" fill="#e5e7eb" stroke="#4b5563" strokeWidth="4" />
-          <circle cx="100" cy="140" r="20" fill="url(#windowGlass)" />
-
-          {/* Reflection on Window */}
-          <path d="M90 130 Q95 125 105 130" stroke="white" strokeWidth="3" strokeLinecap="round" fill="none" opacity="0.8" />
-        </svg>
-
-        {/* Engine Flames */}
-        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex justify-center">
-          {/* Core Flame */}
-          <div className="w-8 h-24 bg-orange-400 rounded-full blur-sm animate-[flame_0.2s_infinite_alternate] origin-top" />
-          {/* Outer Glow */}
-          <div className="absolute top-0 w-16 h-32 bg-red-500/40 rounded-full blur-md animate-[flame_0.4s_infinite_alternate-reverse] origin-top" />
-        </div>
-      </div>
-
-      {/* Smoke Particles */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-20 h-20 pointer-events-none">
-        {[...Array(6)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-white rounded-full opacity-0"
-            style={{
-              width: Math.random() * 20 + 10 + 'px',
-              height: Math.random() * 20 + 10 + 'px',
-              animation: `smoke 2s infinite linear`,
-              animationDelay: `${Math.random() * 2}s`,
-              left: `${Math.random() * 40 - 20}px`
-            }}
-          />
-        ))}
-      </div>
-
-      <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-20px) rotate(1deg); }
-        }
-        @keyframes flame {
-          0% { transform: scaleY(1); opacity: 0.9; }
-          100% { transform: scaleY(0.8); opacity: 0.6; }
-        }
-        @keyframes smoke {
-          0% { transform: translateY(0) scale(0.5); opacity: 0.5; }
-          100% { transform: translateY(100px) scale(2); opacity: 0; }
-        }
-      `}</style>
+    <div
+      ref={ref}
+      className={`transition-all duration-1000 ease-out transform ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'} ${className}`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
     </div>
   );
 };
 
-// --- UI Components ---
+// --- BRAND CONFIGURATION ---
 
-const BookingModal = ({ isOpen, onClose }) => {
-  // Prevent body scroll when modal is open
+const ExponentialSuccessGraph = () => {
+  const [week, setWeek] = useState(0);
+  const containerRef = useRef(null);
+
+  // Smooth Animation Loop
   useEffect(() => {
-    if (isOpen) {
+    let animationFrame;
+    const animate = () => {
+      setWeek(prev => {
+        // Reset cleanly at end
+        if (prev >= 12) return 0;
+        return prev + 0.03; // Slightly faster for better flow
+      });
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, []);
+
+  const width = 800;
+  const height = 400;
+  const padding = 80; // Increased padding to prevent edge clipping
+
+  const getLinearY = (w) => (w / 12) * (height * 0.35);
+  const getExponentialY = (w) => {
+    const growth = Math.exp(w * 0.38) - 1;
+    const maxGrowth = Math.exp(12 * 0.38) - 1;
+    return (growth / maxGrowth) * (height * 0.75);
+  };
+
+  const generatePath = (type) => {
+    let d = `M ${padding} ${height - padding}`;
+    for (let w = 0; w <= 12; w += 0.1) {
+      const x = padding + (w / 12) * (width - 2 * padding);
+      const y = height - padding - (type === 'linear' ? getLinearY(w) : getExponentialY(w));
+      d += ` L ${x} ${y}`;
+    }
+    return d;
+  };
+
+  const currentX = padding + (week / 12) * (width - 2 * padding);
+  const currentExpY = height - padding - getExponentialY(week);
+
+  // Live numbers
+  const rawProb = Math.min(99.9, (Math.exp(week * 0.4) - 1) * 2.2);
+  const displayProb = rawProb.toFixed(2);
+  const displayVelocity = Math.exp(week * 0.2).toFixed(2);
+
+  return (
+    <div className="w-full max-w-6xl mx-auto mt-16 mb-12 px-4">
+      {/* REMOVED overflow-hidden to allow tooltip to extend beyond bounds if needed */}
+      <div className="bg-white border border-slate-200 rounded-3xl p-1 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] relative group">
+
+        {/* Header Overlay */}
+        <div className="absolute top-0 left-0 right-0 p-8 flex flex-col md:flex-row justify-between items-start md:items-center z-20 pointer-events-none">
+          <div>
+            <div className="inline-flex items-center gap-2 mb-3 text-blue-600 text-[10px] font-mono font-bold uppercase tracking-widest border border-blue-50 bg-blue-50/50 px-3 py-1.5 rounded-full">
+              <Activity className="w-3 h-3" />
+              Live Projection
+            </div>
+            <h3 className="text-2xl text-slate-900 font-bold tracking-tight">Velocity Delta</h3>
+          </div>
+
+          <div className="mt-4 md:mt-0 bg-white/80 backdrop-blur-md border border-slate-100 rounded-lg px-4 py-2 shadow-sm flex items-center gap-3">
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timeline</span>
+            <div className="w-px h-3 bg-slate-300"></div>
+            <span className="text-xs font-mono font-bold text-slate-700">Week {week.toFixed(1)}</span>
+          </div>
+        </div>
+
+        {/* The Graph Visual */}
+        {/* Added rounded-3xl and overflow-hidden HERE to clip the grid lines but NOT the tooltip if it floats out (tooltip is absolute in parent? no wait tooltip is inside here) */}
+        {/* Correction: The tooltip is inside this div. I will remove overflow-hidden from THIS div too, and apply border-radius via a background mask or separate container if needed. 
+            Actually, the safest way is to keep overflow-visible and ensure padding is sufficient. */}
+        <div className="relative h-[500px] w-full bg-white rounded-3xl" ref={containerRef}>
+          {/* Grid Background - Masked manually to respect rounded corners if needed, or just let it fill */}
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.015)_1px,transparent_1px)] bg-[size:80px_80px] rounded-3xl"></div>
+
+          <svg preserveAspectRatio="none" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="absolute inset-0 overflow-visible pointer-events-none">
+            <defs>
+              <linearGradient id="expGradientLight" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#2563EB" stopOpacity="0.1" />
+                <stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
+              </linearGradient>
+            </defs>
+
+            {/* Axes */}
+            <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#F1F5F9" strokeWidth="2" />
+            <line x1={padding} y1={height - padding} x2={padding} y2={padding} stroke="#F1F5F9" strokeWidth="2" />
+
+            {/* Linear Ghost */}
+            <path d={generatePath('linear')} fill="none" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4 4" className="opacity-50" />
+            <text x={width - padding - 10} y={height - padding - getLinearY(12) - 10} textAnchor="end" fill="#94A3B8" fontSize="11" fontWeight="500" fontFamily="sans-serif">Standard Agency</text>
+
+            {/* Exponential Curve */}
+            <path d={generatePath('exponential')} fill="url(#expGradientLight)" stroke="#2563EB" strokeWidth="4" strokeLinecap="round" className="drop-shadow-md" />
+            <text x={width - padding - 10} y={height - padding - getExponentialY(12) - 15} textAnchor="end" fill="#2563EB" fontSize="14" fontWeight="800" fontFamily="sans-serif">ScaleX (e^x)</text>
+
+            {/* Scanner Line & Dot (Animated) */}
+            <line
+              x1={currentX} y1={padding} x2={currentX} y2={height - padding}
+              stroke="#2563EB" strokeWidth="1" strokeOpacity="0.15"
+              style={{ transition: 'x1 0.1s linear, x2 0.1s linear' }}
+            />
+            <circle
+              cx={currentX} cy={currentExpY} r="6"
+              fill="#2563EB" stroke="white" strokeWidth="2"
+              style={{ transition: 'cx 0.1s linear, cy 0.1s linear' }}
+            />
+          </svg>
+
+          {/* Precision Data Overlay */}
+          <div
+            className="absolute z-30 bg-white/95 backdrop-blur-xl border border-slate-100 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col gap-1 pointer-events-none p-6 min-w-[200px]"
+            style={{
+              left: `${(currentX / width) * 100}%`,
+              top: `${(currentExpY / height) * 100}%`,
+              // Smart positioning: flip to left after week 6, smooth transition
+              transform: `translate(${week > 6 ? '-110%' : '10%'}, -50%)`,
+              transition: 'left 0.1s linear, top 0.1s linear, transform 0.3s ease-out'
+            }}
+          >
+            <div className="flex items-center gap-2 mb-2">
+              <div className={`w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse`}></div>
+              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Exponential Probability</span>
+            </div>
+
+            <div className="text-5xl font-bold text-slate-900 tabular-nums leading-none tracking-tighter">
+              {displayProb}%
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs font-mono">
+              <span className="text-slate-400">Velocity Factor</span>
+              <span className="text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded flex items-center gap-1">
+                <TrendingUp className="w-3 h-3" />
+                {displayVelocity}x
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// --- COMPONENT: LOGO ---
+const BrandLogo = () => (
+  <div className="flex items-baseline group cursor-pointer select-none relative">
+    {/* Text Only Logo */}
+    <span className="text-3xl font-medium tracking-tight text-slate-700 group-hover:text-slate-900 transition-colors">scale</span>
+    {/* Styled superscript x */}
+    <sup className="text-xl font-black text-slate-900 -top-2 ml-0.5 tracking-tighter group-hover:text-blue-600 transition-colors" style={{ fontFamily: 'ui-sans-serif, system-ui' }}>x</sup>
+  </div>
+);
+
+// --- COMPONENT: TECH STACK STRIP ---
+const TechStackIcon = ({ label }) => (
+  <div className="flex items-center gap-2 px-4 py-2 border border-slate-100 rounded-lg bg-slate-50/50">
+    <div className="w-2 h-2 rounded-full bg-slate-300"></div>
+    <span className="text-xs font-bold text-slate-600">{label}</span>
+  </div>
+)
+
+// --- COMPONENT: SERVICE CARD ---
+const ServiceCard = ({ title, desc, icon: Icon, color }) => (
+  <div className="group relative bg-white p-8 rounded-2xl border border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 h-full flex flex-col">
+    {/* Top Border Accent */}
+    <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${color}`}></div>
+
+    <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+      <Icon className="w-6 h-6 text-slate-700" />
+    </div>
+
+    <h3 className="text-xl font-bold text-slate-900 mb-3">{title}</h3>
+    <p className="text-sm text-slate-500 leading-relaxed mb-6">{desc}</p>
+
+    <div className="mt-auto flex items-center text-xs font-bold text-slate-400 group-hover:text-slate-900 transition-colors uppercase tracking-widest">
+      Learn More <ArrowRight className="w-3 h-3 ml-2" />
+    </div>
+  </div>
+)
+
+// --- COMPONENT: BROWSER WINDOW CASE STUDY ---
+const BrowserWindow = ({ title, url, children }) => (
+  <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden flex flex-col h-full hover:translate-y-[-4px] transition-transform duration-500 group">
+    {/* Browser Header */}
+    <div className="bg-slate-50 border-b border-slate-200 px-4 py-3 flex items-center gap-4">
+      <div className="flex gap-1.5">
+        <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+        <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+        <div className="w-2.5 h-2.5 rounded-full bg-slate-300"></div>
+      </div>
+      <div className="flex-1 bg-white border border-slate-200 rounded-md py-1 px-3 text-[10px] text-slate-400 font-mono truncate text-center">
+        {url}
+      </div>
+    </div>
+    {/* Browser Body */}
+    <div className="relative flex-1 bg-slate-100 overflow-hidden">
+      {children}
+      {/* Overlay Content */}
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 to-transparent p-6 flex flex-col justify-end opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <h4 className="text-white font-bold text-lg">{title}</h4>
+        <div className="flex items-center text-white/80 text-xs mt-2 font-bold">
+          View Case Study <ArrowRight className="w-3 h-3 ml-2" />
+        </div>
+      </div>
+    </div>
+  </div>
+)
+
+// --- COMPONENT: PRICING / PACKAGE CARD ---
+const PackageCard = ({ title, days, price, subtitle, features, recommended }) => (
+  <div className={`relative p-8 rounded-3xl border flex flex-col h-full ${recommended ? 'bg-slate-900 text-white border-slate-800 shadow-2xl' : 'bg-white text-slate-900 border-slate-200'}`}>
+    {recommended && (
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+        Most Popular
+      </div>
+    )}
+
+    <div className="mb-8">
+      <div className="flex items-center justify-between mb-2">
+        <h3 className={`text-xl font-bold ${recommended ? 'text-white' : 'text-slate-900'}`}>{title}</h3>
+        <span className={`text-xs font-mono px-2 py-1 rounded ${recommended ? 'bg-slate-800 text-blue-400' : 'bg-slate-100 text-blue-600'}`}>{days} Days</span>
+      </div>
+      <p className={`text-sm ${recommended ? 'text-slate-400' : 'text-slate-500'}`}>{subtitle}</p>
+    </div>
+
+    <div className="mb-8">
+      <div className="flex items-baseline gap-1">
+        <span className="text-4xl font-bold tracking-tight">{price}</span>
+      </div>
+    </div>
+
+    <div className="flex-1 space-y-4 mb-8">
+      {features.map((feature, i) => (
+        <div key={i} className="flex items-start gap-3 text-sm">
+          <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${recommended ? 'text-blue-400' : 'text-slate-900'}`} />
+          <span className={recommended ? 'text-slate-300' : 'text-slate-600'}>{feature}</span>
+        </div>
+      ))}
+    </div>
+
+    <button className={`w-full py-4 rounded-xl font-bold text-sm transition-all ${recommended ? 'bg-white text-slate-900 hover:bg-slate-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+      Start {days}-Day Sprint
+    </button>
+  </div>
+)
+
+// --- ALTERNATING TIMELINE COMPONENT ---
+const TimelineStep = ({ step, title, desc, icon: Icon, tags, side }) => {
+  return (
+    <FadeIn>
+      <div className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 relative w-full ${side === 'right' ? 'md:flex-row-reverse' : ''}`}>
+
+        {/* 1. TEXT CONTENT SIDE */}
+        <div className={`md:w-1/2 flex flex-col ${side === 'right' ? 'md:items-start' : 'md:items-end md:text-right'}`}>
+          <div className="flex items-center gap-3 mb-3">
+            <span className="text-blue-600 font-mono text-sm font-bold bg-blue-50 px-2 py-1 rounded border border-blue-100">
+              {step}
+            </span>
+            <div className="h-px w-12 bg-slate-200"></div>
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">{title}</h3>
+          <p className="text-slate-500 text-sm leading-relaxed max-w-sm mb-6">
+            {desc}
+          </p>
+          <div className={`flex flex-wrap gap-2 ${side === 'right' ? 'justify-start' : 'justify-end'}`}>
+            {tags.map(t => (
+              <span key={t} className="text-[10px] font-bold text-slate-400 uppercase tracking-wider border border-slate-100 px-2 py-1 rounded bg-slate-50">
+                {t}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. CENTER ICON NODE */}
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 flex flex-col items-center h-full z-10 hidden md:flex">
+          <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center relative z-20 group hover:scale-110 hover:border-blue-500 transition-all duration-300">
+            <Icon className="w-5 h-5 text-slate-700 group-hover:text-blue-600 transition-colors" />
+            {/* Pulse Effect behind icon */}
+            <div className="absolute inset-0 bg-blue-100 rounded-xl -z-10 opacity-0 group-hover:opacity-50 blur-lg transition-opacity"></div>
+          </div>
+        </div>
+
+        {/* 3. EMPTY SIDE (For spacing balance) */}
+        <div className="md:w-1/2 hidden md:block"></div>
+
+        {/* Mobile Line Connector (Visible only on mobile) */}
+        <div className="absolute left-6 top-0 bottom-0 w-px bg-slate-200 md:hidden"></div>
+      </div>
+    </FadeIn>
+  )
+};
+
+export default function App() {
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [calModalOpen, setCalModalOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 20);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (calModalOpen) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = 'unset';
@@ -125,365 +377,359 @@ const BookingModal = ({ isOpen, onClose }) => {
     return () => {
       document.body.style.overflow = 'unset';
     };
-  }, [isOpen]);
-
-  if (!isOpen) return null;
+  }, [calModalOpen]);
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-        onClick={onClose}
-      />
+    <div className="min-h-screen bg-white font-sans text-slate-900 selection:bg-blue-50 selection:text-blue-900">
 
-      {/* Modal Content */}
-      <div className="relative w-full max-w-5xl h-[85vh] bg-white rounded-2xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 bg-white z-10">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center text-white font-bold text-sm">
-              X
-            </div>
-            <span className="font-bold text-gray-900">Schedule Call</span>
+      {/* --- NAVBAR --- */}
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out ${scrolled ? 'bg-white/90 backdrop-blur-md border-b border-slate-200/60 py-4' : 'bg-transparent py-6'}`}>
+        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+          <BrandLogo />
+
+          <div className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-500">
+            <a href="#capabilities" className="hover:text-slate-900 transition-colors">Capabilities</a>
+            <a href="#process" className="hover:text-slate-900 transition-colors">Process</a>
+            <a href="#work" className="hover:text-slate-900 transition-colors">Work</a>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+
+          <div className="flex items-center gap-4 z-50">
+            <button onClick={() => setCalModalOpen(true)} className="hidden md:flex bg-slate-900 text-white px-5 py-2.5 rounded-lg text-sm font-semibold hover:bg-slate-800 transition-all items-center gap-2 group shadow-[0_10px_20px_-10px_rgba(15,23,42,0.3)] hover:shadow-[0_20px_30px_-10px_rgba(15,23,42,0.2)]">
+              Book Strategy Call
+              <ArrowRight className="w-3.5 h-3.5 opacity-70 group-hover:translate-x-0.5 group-hover:opacity-100 transition-all" />
+            </button>
+            <button className="md:hidden text-slate-900 p-2" onClick={() => setMenuOpen(!menuOpen)}>
+              {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      {/* --- HERO SECTION --- */}
+      <section className="pt-32 pb-10 px-6 relative overflow-hidden">
+        {/* Subtle Background Pattern */}
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 -z-10"></div>
+
+        <div className="max-w-7xl mx-auto mt-20">
+          <div className="max-w-4xl mx-auto text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-600 mb-8 uppercase tracking-widest shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+              Accepting Q4 Projects
+            </div>
+
+            <h1 className="text-6xl md:text-[5.5rem] font-bold tracking-tighter text-slate-900 mb-8 leading-[0.95] -ml-1">
+              BUILD YOUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">MVP</span> <br />
+              AND GET YOUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">FIRST CUSTOMERS</span> <br />
+              IN <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">21 DAYS</span>
+            </h1>
+
+            <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-light mb-12">
+              We build your MVP fast and help you <span className="text-slate-900 font-medium">market it</span>, turning your vision into a <span className="text-slate-900 font-medium">validated business</span> with rapid market entry.
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center gap-5">
+              <button onClick={() => setCalModalOpen(true)} className="bg-slate-900 text-white px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-900/10 group">
+                Book Your Sprint <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
+              <button className="bg-white text-slate-900 border border-slate-200 px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
+                View Architecture
+              </button>
+            </div>
+          </div>
+
+          {/* EXPONENTIAL GRAPH */}
+          <ExponentialSuccessGraph />
+
+          {/* TECH STACK STRIP */}
+          <FadeIn delay={200}>
+            <div className="mt-12 flex flex-wrap justify-center items-center gap-4 max-w-4xl mx-auto">
+              <TechStackIcon label="Next.js 14" />
+              <TechStackIcon label="TypeScript" />
+              <TechStackIcon label="Tailwind CSS" />
+              <TechStackIcon label="Supabase" />
+              <TechStackIcon label="Figma" />
+              <TechStackIcon label="Stripe" />
+            </div>
+          </FadeIn>
+
+        </div>
+      </section>
+
+      {/* --- CAPABILITIES --- */}
+      <section id="capabilities" className="py-32 bg-slate-50/50 border-t border-slate-200 relative">
+        <div className="max-w-7xl mx-auto px-6">
+          <FadeIn>
+            <div className="text-center max-w-2xl mx-auto mb-20">
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-slate-900 mb-6">Full-Stack Capabilities.</h2>
+              <p className="text-lg text-slate-500 leading-relaxed font-light">
+                From Day 1 to Scale. We handle every layer of the product journey.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 h-auto">
+            <FadeIn delay={100} className="h-full">
+              <ServiceCard
+                title="SaaS Landing Page"
+                desc="Transform your SaaS idea into a stunning, conversion-optimized landing page that attracts users."
+                icon={Layout}
+                color="bg-purple-500"
+              />
+            </FadeIn>
+            <FadeIn delay={200} className="h-full">
+              <ServiceCard
+                title="MVP Development"
+                desc="Get your minimum viable product built and launched in 2 weeks. We help you validate quickly."
+                icon={Code2}
+                color="bg-blue-500"
+              />
+            </FadeIn>
+            <FadeIn delay={300} className="h-full">
+              <ServiceCard
+                title="Maintenance"
+                desc="Keep your product running smoothly with our ongoing support. Bug fixes, updates, and improvements."
+                icon={Wrench}
+                color="bg-orange-500"
+              />
+            </FadeIn>
+            <FadeIn delay={400} className="h-full">
+              <ServiceCard
+                title="Custom"
+                desc="Have something unique in mind? Let's build a tailored solution that fits your vision perfectly."
+                icon={PenTool}
+                color="bg-pink-500"
+              />
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* --- ALTERNATING PROCESS TIMELINE --- */}
+      <section id="process" className="py-32 bg-white border-y border-slate-100 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-6 relative z-10">
+          <FadeIn>
+            <div className="text-center mb-24">
+              <h2 className="text-4xl font-bold tracking-tighter mb-4">How We Work.</h2>
+              <p className="text-slate-500">A transparent, high-velocity process designed for speed.</p>
+            </div>
+          </FadeIn>
+
+          <div className="relative">
+            {/* Central Timeline Line (Desktop) */}
+            <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-200 -translate-x-1/2 hidden md:block"></div>
+
+            <div className="space-y-24">
+
+              <TimelineStep
+                step="01"
+                side="left"
+                title="Discovery Call"
+                desc="We discuss your vision, market opportunity, and technical requirements to ensure perfect alignment."
+                icon={MessageSquare}
+                tags={['Strategy', 'Audit']}
+              />
+
+              <TimelineStep
+                step="02"
+                side="right"
+                title="Strategic Planning"
+                desc="Together, we create a roadmap that includes core features, tech stack decisions, and timelines."
+                icon={GitBranch}
+                tags={['Roadmap', 'Tech Stack']}
+              />
+
+              <TimelineStep
+                step="03"
+                side="left"
+                title="Rapid Development"
+                desc="Our agents build your MVP with regular demos and feedback loops to ensure we hit the mark."
+                icon={Terminal}
+                tags={['Sprints', 'Code']}
+              />
+
+              <TimelineStep
+                step="04"
+                side="right"
+                title="Launch & Growth"
+                desc="We deploy your MVP and provide guidance on user acquisition and scaling strategies."
+                icon={ArrowUpRight}
+                tags={['Deploy', 'Scale']}
+              />
+
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* --- WORK (Browser Style) --- */}
+      <section id="work" className="py-32 bg-slate-50 border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <FadeIn>
+            <div className="flex justify-between items-end mb-16">
+              <div>
+                <h2 className="text-4xl font-bold tracking-tighter mb-4 text-slate-900">Explore Our Work.</h2>
+                <p className="text-slate-500 max-w-xl">
+                  Real projects, real results. See what we've built for startups just like yours.
+                </p>
+              </div>
+              <button className="hidden md:flex items-center gap-2 text-sm font-bold border-b-2 border-slate-900 pb-1 hover:text-blue-600 hover:border-blue-600 transition-all">
+                View all projects <ArrowRight className="w-4 h-4" />
+              </button>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-auto md:h-[400px]">
+            <FadeIn delay={100} className="h-full">
+              <BrowserWindow title="FinTech Dashboard" url="app.finance-ai.com">
+                <div className="w-full h-full bg-slate-100 p-4">
+                  <div className="w-full h-full bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
+                    <div className="flex gap-4 mb-4">
+                      <div className="w-1/3 h-24 bg-blue-50 rounded"></div>
+                      <div className="w-1/3 h-24 bg-slate-50 rounded"></div>
+                      <div className="w-1/3 h-24 bg-slate-50 rounded"></div>
+                    </div>
+                    <div className="w-full h-32 bg-slate-50 rounded"></div>
+                  </div>
+                </div>
+              </BrowserWindow>
+            </FadeIn>
+
+            <FadeIn delay={200} className="h-full">
+              <BrowserWindow title="Legal SaaS Platform" url="discovery.legal.io">
+                <div className="w-full h-full bg-slate-100 p-4 flex gap-4">
+                  <div className="w-1/4 h-full bg-white rounded-lg border border-slate-200"></div>
+                  <div className="w-3/4 h-full bg-white rounded-lg border border-slate-200 p-3 space-y-2">
+                    <div className="w-full h-4 bg-slate-50 rounded"></div>
+                    <div className="w-2/3 h-4 bg-slate-50 rounded"></div>
+                    <div className="w-full h-20 bg-blue-50 rounded mt-4"></div>
+                  </div>
+                </div>
+              </BrowserWindow>
+            </FadeIn>
+
+            <FadeIn delay={300} className="h-full">
+              <BrowserWindow title="E-commerce Analytics" url="shop-insights.co">
+                <div className="w-full h-full bg-slate-100 p-4 space-y-3">
+                  <div className="flex justify-between">
+                    <div className="w-20 h-6 bg-white rounded"></div>
+                    <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
+                  </div>
+                  <div className="w-full h-full bg-white rounded-lg border border-slate-200"></div>
+                </div>
+              </BrowserWindow>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* --- ENGAGEMENT MODELS --- */}
+      <section id="pricing" className="py-32 bg-white border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold tracking-tighter mb-4 text-slate-900">Engagement Models.</h2>
+              <p className="text-slate-500">Transparent packages designed for speed and impact.</p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto h-auto md:h-[600px]">
+            <FadeIn delay={100} className="h-full">
+              <PackageCard
+                title="The POC Sprint"
+                days="14"
+                subtitle="Validate your core idea technically."
+                price="Start Up"
+                features={[
+                  "Custom-designed landing page",
+                  "Core Logic Validation",
+                  "Authentication & Database",
+                  "Functional Prototype",
+                  "14-Day Delivery Guarantee"
+                ]}
+                recommended={false}
+              />
+            </FadeIn>
+
+            <FadeIn delay={200} className="h-full">
+              <PackageCard
+                title="The MVP Sprint"
+                days="21"
+                subtitle="Go live with a market-ready product."
+                price="Scale Up"
+                features={[
+                  "Everything in POC Sprint",
+                  "Full Production Deployment",
+                  "Stripe Payments Integration",
+                  "SEO & Analytics Setup",
+                  "First Customer Onboarding",
+                  "21-Day Delivery Guarantee"
+                ]}
+                recommended={true}
+              />
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
+      {/* --- FOOTER --- */}
+      <footer className="bg-slate-50 pt-24 pb-12 border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+          <div>
+            <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center mb-6">
+              <span className="text-white font-bold text-xl font-serif italic">S</span>
+            </div>
+            <p className="text-slate-500 max-w-xs text-sm leading-relaxed">
+              <strong>ScaleX Studio</strong><br />
+              The MVP Agency for the AI Era.<br />
+              San Francisco, CA
+            </p>
+          </div>
+
+          <div className="flex gap-12 text-sm font-bold text-slate-900">
+            <a href="#" className="hover:text-blue-600 transition-colors">Methodology</a>
+            <a href="#" className="hover:text-blue-600 transition-colors">Case Studies</a>
+            <a href="#" className="hover:text-blue-600 transition-colors">Twitter</a>
+            <a href="mailto:build@scalex.studio" className="hover:text-blue-600 transition-colors">build@scalex.studio</a>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-slate-200 text-xs text-slate-400 flex justify-between font-mono">
+          <span>© 2024 ScaleX Studio. All rights reserved.</span>
+          <span>Probability = e^x</span>
+        </div>
+      </footer>
+
+      {/* Cal.com Modal */}
+      {calModalOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-md transition-opacity p-4"
+          onClick={() => setCalModalOpen(false)}
+        >
+          <div
+            className="relative w-full max-w-5xl h-[85vh] bg-white rounded-3xl border border-slate-200 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.15)] overflow-hidden flex flex-col"
+            onClick={(e) => e.stopPropagation()}
           >
-            <X size={24} className="text-gray-500" />
-          </button>
-        </div>
-
-        {/* Cal.com Embed */}
-        <div className="flex-1 w-full bg-gray-50">
-          <iframe
-            src="https://cal.com/rishabh-jangid-jvj8qi" // REPLACE WITH YOUR CAL.COM LINK
-            className="w-full h-full border-0"
-            title="Book a call"
-          />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-const Navbar = ({ onBookCall }) => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  return (
-    <nav className={`fixed top-0 w-full z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-md border-b border-gray-200' : 'bg-transparent'}`}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-24">
-          {/* Logo */}
-          <div className="flex items-center gap-2 cursor-pointer group">
-            <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg shadow-orange-500/20 group-hover:scale-105 transition-transform">
-              X
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 bg-slate-50 border-b border-slate-200 flex-shrink-0">
+              <h3 className="text-lg font-bold text-slate-900">Schedule Call</h3>
+              <button
+                onClick={() => setCalModalOpen(false)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-200 transition-colors text-slate-600 hover:text-slate-900"
+              >
+                <X className="w-5 h-5" />
+              </button>
             </div>
-            <span className="text-2xl font-bold tracking-tight text-gray-900">scaleX</span>
-          </div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-8">
-            <a href="#process" className="text-gray-600 hover:text-orange-600 font-medium text-sm transition-colors">Process</a>
-            <a href="#work" className="text-gray-600 hover:text-orange-600 font-medium text-sm transition-colors">Work</a>
-            <a href="#capabilities" className="text-gray-600 hover:text-orange-600 font-medium text-sm transition-colors">Capabilities</a>
-            <button
-              onClick={onBookCall}
-              className="bg-black text-white px-6 py-3 rounded-full font-bold text-sm hover:bg-orange-600 transition-colors shadow-xl shadow-orange-500/10 hover:shadow-orange-500/30"
-            >
-              Book Strategy Call
-            </button>
-          </div>
-
-          {/* Mobile Toggle */}
-          <div className="md:hidden">
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
-              {isMobileMenuOpen ? <X /> : <Menu />}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-100 absolute w-full p-6 shadow-xl animate-in slide-in-from-top-5 z-40">
-          <div className="flex flex-col space-y-4">
-            <a href="#process" className="text-lg font-medium text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>Process</a>
-            <a href="#work" className="text-lg font-medium text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>Work</a>
-            <a href="#capabilities" className="text-lg font-medium text-gray-900" onClick={() => setIsMobileMenuOpen(false)}>Capabilities</a>
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                onBookCall();
-              }}
-              className="bg-orange-600 text-white py-4 rounded-xl font-bold"
-            >
-              Book Strategy Call
-            </button>
+            {/* Iframe Container */}
+            <div className="flex-1 min-h-0 bg-white">
+              <iframe
+                src="https://cal.com/rishabh-jangid-jvj8qi"
+                className="w-full h-full border-0"
+                title="Book a meeting"
+              />
+            </div>
           </div>
         </div>
       )}
-    </nav>
-  );
-};
-
-const Hero = ({ onBookCall }) => {
-  return (
-    <section className="relative min-h-screen flex items-center bg-gray-50 pt-20 overflow-hidden">
-      {/* Background Decorative Elements */}
-      <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-orange-50 to-transparent opacity-50 pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-96 h-96 bg-orange-200/20 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
-
-          {/* Left Column: Content */}
-          <div className="flex flex-col items-start space-y-8 animate-in slide-in-from-left duration-700">
-            <div className="flex flex-wrap gap-3">
-              <span className="px-4 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-bold uppercase tracking-widest text-gray-500 shadow-sm">
-                Strategy
-              </span>
-              <span className="px-4 py-1.5 bg-white border border-gray-200 rounded-full text-xs font-bold uppercase tracking-widest text-gray-500 shadow-sm">
-                Engineering
-              </span>
-              <span className="px-4 py-1.5 bg-orange-100 border border-orange-200 rounded-full text-xs font-bold uppercase tracking-widest text-orange-700 flex items-center gap-2 shadow-sm">
-                <Zap size={14} fill="currentColor" /> Growth
-              </span>
-            </div>
-
-            <h1 className="text-5xl lg:text-7xl font-black text-gray-900 leading-[1.1] tracking-tight">
-              We build <br />
-              <span className="relative inline-block">
-                digital products
-                {/* Small SVG Star Icon decoration */}
-                <svg className="absolute -top-6 -right-10 w-10 h-10 text-orange-500 animate-[spin_4s_linear_infinite]" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 0L14.59 9.41L24 12L14.59 14.59L12 24L9.41 14.59L0 12L9.41 9.41L12 0Z" />
-                </svg>
-              </span>
-              <br />
-              that <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600 italic">scale.</span>
-            </h1>
-
-            <p className="text-xl text-gray-500 max-w-lg leading-relaxed">
-              From MVP to IPO. We are the engineering team behind the fastest growing startups in the valley. 100% US-aligned.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto pt-4">
-              <button
-                onClick={onBookCall}
-                className="group bg-gray-900 text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-orange-600 transition-all shadow-2xl shadow-gray-900/20 hover:shadow-orange-500/30 flex items-center justify-center gap-2 transform hover:-translate-y-1"
-              >
-                Start Project
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button className="bg-white text-gray-900 border border-gray-200 px-8 py-4 rounded-full font-bold text-lg hover:border-orange-500 hover:text-orange-500 transition-all flex items-center justify-center gap-2 shadow-sm hover:shadow-md">
-                View Case Studies
-              </button>
-            </div>
-          </div>
-
-          {/* Right Column: Animated Rocket */}
-          <div className="h-[400px] lg:h-[600px] w-full flex items-center justify-center animate-in fade-in duration-1000 delay-200">
-            <CssRocket />
-          </div>
-
-        </div>
-      </div>
-    </section>
-  );
-};
-
-const FeatureCard = ({ icon: Icon, title, desc }) => (
-  <div className="p-8 bg-white rounded-3xl border border-gray-100 hover:border-orange-200 shadow-sm hover:shadow-2xl hover:shadow-orange-500/10 transition-all duration-300 group hover:-translate-y-1">
-    <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-6 text-orange-600 group-hover:scale-110 transition-transform">
-      <Icon size={28} />
-    </div>
-    <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-    <p className="text-gray-500 leading-relaxed">{desc}</p>
-  </div>
-);
-
-const Process = () => (
-  <section id="process" className="py-24 bg-white">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl font-black text-gray-900 mb-4">The Protocol</h2>
-        <p className="text-gray-500 max-w-2xl mx-auto">Our military-grade engineering process designed to minimize risk.</p>
-      </div>
-      <div className="grid md:grid-cols-3 gap-8">
-        <FeatureCard
-          icon={Zap}
-          title="Rapid POC"
-          desc="14-day sprint to validate core logic. We build the ugly but functional version to prove the concept before burning cash."
-        />
-        <FeatureCard
-          icon={Rocket}
-          title="MVP Launch"
-          desc="Full scale build with security, auth, and payments. Ready for real users and revenue generation."
-        />
-        <FeatureCard
-          icon={Layers}
-          title="Scale Ops"
-          desc="Long-term maintenance and scaling. We handle the infrastructure while you grow the business."
-        />
-      </div>
-    </div>
-  </section>
-);
-
-const Work = () => (
-  <section id="work" className="py-24 bg-gray-50 border-t border-gray-200">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
-        <div>
-          <h2 className="text-4xl font-black text-gray-900 mb-4">Selected Work</h2>
-          <p className="text-gray-500 max-w-lg">We don't just build software; we build businesses. Here are a few of our recent exits and scaling stories.</p>
-        </div>
-        <button className="text-orange-600 font-bold flex items-center gap-2 hover:gap-4 transition-all">
-          View all projects <ArrowRight size={20} />
-        </button>
-      </div>
-
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {[1, 2, 3].map((item) => (
-          <div key={item} className="group relative h-96 rounded-3xl overflow-hidden shadow-md cursor-pointer">
-            {/* Lighter gradient overlay with mix-blend-overlay */}
-            <div className={`absolute inset-0 bg-gradient-to-br ${item === 1 ? 'from-blue-400 to-purple-400' : item === 2 ? 'from-emerald-400 to-teal-400' : 'from-orange-400 to-red-400'} mix-blend-overlay opacity-40 z-10`} />
-
-            {/* New lighter theme images */}
-            <img
-              src={`https://images.unsplash.com/photo-${item === 1 ? '1460925895917-afdab827c52f' : item === 2 ? '1505751172876-fa1923c5c528' : '1454165804606-c3d57bc86b40'}?auto=format&fit=crop&w=800&q=80`}
-              alt="Project"
-              className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-            />
-            <div className="absolute inset-0 z-20 p-8 flex flex-col justify-between text-white">
-              <div className="opacity-0 group-hover:opacity-100 transition-opacity transform -translate-y-4 group-hover:translate-y-0 duration-300">
-                <span className="px-3 py-1 border border-white/30 rounded-full text-xs font-bold backdrop-blur-sm">FINTECH</span>
-              </div>
-              <div>
-                <h3 className="text-3xl font-bold mb-2 translate-y-4 group-hover:translate-y-0 transition-transform duration-300">Project Alpha</h3>
-                <p className="text-white/80 text-sm line-clamp-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100">
-                  Redefining the future of payments with blockchain integration and AI-driven fraud detection.
-                </p>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-);
-
-const Capabilities = () => (
-  <section id="capabilities" className="py-24 bg-gray-900 text-white overflow-hidden relative">
-    <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none" />
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-      <div className="grid lg:grid-cols-2 gap-16 items-center">
-        <div>
-          <h2 className="text-4xl font-black mb-6">Full-Stack Capabilities</h2>
-          <p className="text-gray-400 text-lg mb-8 leading-relaxed">
-            We are stack agnostic but opinionated. We choose the right tools for the scale you need to achieve. No bloat, just performance.
-          </p>
-
-          <div className="space-y-6">
-            {[
-              { icon: Code, title: "Frontend Engineering", desc: "React, Next.js, TypeScript, Tailwind, Framer Motion" },
-              { icon: Cpu, title: "Backend & Infrastructure", desc: "Node.js, Python, Go, AWS, Kubernetes, Supabase" },
-              { icon: Smartphone, title: "Mobile Native", desc: "React Native, iOS Swift, Android Kotlin" }
-            ].map((cap, i) => (
-              <div key={i} className="flex items-start gap-4 p-4 rounded-2xl hover:bg-white/5 transition-colors">
-                <div className="p-3 bg-blue-600/20 rounded-xl text-blue-400">
-                  <cap.icon size={24} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-xl mb-1">{cap.title}</h4>
-                  <p className="text-gray-500 text-sm">{cap.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white/5 rounded-3xl p-8 border border-white/10 backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-6 border-b border-white/10 pb-4">
-            <div className="flex gap-2">
-              <div className="w-3 h-3 rounded-full bg-red-500" />
-              <div className="w-3 h-3 rounded-full bg-yellow-500" />
-              <div className="w-3 h-3 rounded-full bg-green-500" />
-            </div>
-            <div className="text-xs font-mono text-gray-500">deploy.sh</div>
-          </div>
-          <div className="font-mono text-sm space-y-2 text-gray-400">
-            <p><span className="text-green-400">➜</span> <span className="text-blue-400">~</span> initialize_project --scale=high</p>
-            <p className="text-white">Initializing ScaleX Engine v2.0...</p>
-            <p>Loading modules:</p>
-            <div className="pl-4 border-l-2 border-white/10 ml-1 my-2">
-              <p>✓ Analytics........<span className="text-green-400">Ready</span></p>
-              <p>✓ Security.........<span className="text-green-400">Ready</span></p>
-              <p>✓ Scalability......<span className="text-green-400">Optimized</span></p>
-            </div>
-            <p><span className="text-green-400">➜</span> Deploying to production...</p>
-            <p className="animate-pulse text-blue-400">Waiting for command_</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-const Footer = () => (
-  <footer className="bg-black text-white pt-24 pb-12 border-t border-gray-800">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex flex-col md:flex-row justify-between items-center mb-12">
-        <div className="flex items-center gap-2 mb-6 md:mb-0">
-          <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center text-black font-bold">X</div>
-          <span className="text-2xl font-bold">scaleX</span>
-        </div>
-        <div className="text-center md:text-right">
-          <p className="text-gray-400 mb-2">Ready to build something great?</p>
-          <a href="mailto:hello@scalex.studio" className="text-xl font-bold hover:text-blue-500 transition-colors">hello@scalex.studio</a>
-        </div>
-      </div>
-      <div className="border-t border-gray-900 pt-8 flex flex-col md:flex-row justify-between items-center text-sm text-gray-600">
-        <p>© 2024 ScaleX. All rights reserved.</p>
-        <div className="flex gap-6 mt-4 md:mt-0">
-          <a href="#" className="hover:text-white transition-colors">Twitter</a>
-          <a href="#" className="hover:text-white transition-colors">LinkedIn</a>
-          <a href="#" className="hover:text-white transition-colors">Terms</a>
-        </div>
-      </div>
-    </div>
-  </footer>
-);
-
-const App = () => {
-  const [isBookingOpen, setIsBookingOpen] = useState(false);
-
-  const openBooking = () => {
-    setIsBookingOpen(true);
-  };
-
-  return (
-    <div className="font-sans text-gray-900 selection:bg-blue-100 selection:text-blue-900 bg-gray-50">
-      <Navbar onBookCall={openBooking} />
-      <Hero onBookCall={openBooking} />
-      <Process />
-      <Work />
-      <Capabilities />
-      <Footer />
-      <BookingModal isOpen={isBookingOpen} onClose={() => setIsBookingOpen(false)} />
     </div>
   );
-};
-
-export default App;
+}
