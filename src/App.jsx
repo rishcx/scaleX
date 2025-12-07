@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   ArrowRight,
-  TrendingUp,
+
   Activity,
   GitBranch,
   Server,
@@ -21,7 +21,8 @@ import {
   Terminal,
   Layers,
   PenTool,
-  Wrench
+  Wrench,
+  Rocket
 } from 'lucide-react';
 
 // --- UTILS: SCROLL OBSERVER ---
@@ -62,151 +63,272 @@ const FadeIn = ({ children, delay = 0, className = "" }) => {
 
 // --- BRAND CONFIGURATION ---
 
-const ExponentialSuccessGraph = () => {
-  const [week, setWeek] = useState(0);
-  const containerRef = useRef(null);
+// --- COMPONENT: HERO HEADLINE ROTATOR ---
+const HeroHeadlineRotator = () => {
+  const headlines = [
+    {
+      main: "Your Developer Quoted 4 Months.",
+      highlight: "We Quote 28 Days.",
+      suffix: "You Do The Math."
+    },
+    {
+      main: "Don't Build a Startup.",
+      highlight: "Build a Proof of Concept.",
+      suffix: "Then Decide."
+    },
+    {
+      main: "14 Days to Prove You're Right.",
+      highlight: "28 Days to Prove",
+      suffix: "You're Profitable."
+    },
+    {
+      main: "The Gap Between 'AI Code' and 'Shipped Product'",
+      highlight: "Is Where Dreams Die.",
+      suffix: "We Bridge It."
+    }
+  ];
 
-  // Smooth Animation Loop
+  const [index, setIndex] = useState(0);
+  const [fade, setFade] = useState(true);
+
   useEffect(() => {
-    let animationFrame;
-    const animate = () => {
-      setWeek(prev => {
-        // Reset cleanly at end
-        if (prev >= 12) return 0;
-        return prev + 0.03; // Slightly faster for better flow
-      });
-
-      animationFrame = requestAnimationFrame(animate);
-    };
-    animationFrame = requestAnimationFrame(animate);
-    return () => cancelAnimationFrame(animationFrame);
+    const interval = setInterval(() => {
+      setFade(false);
+      setTimeout(() => {
+        setIndex((prev) => (prev + 1) % headlines.length);
+        setFade(true);
+      }, 500);
+    }, 5000);
+    return () => clearInterval(interval);
   }, []);
 
-  const width = 800;
-  const height = 400;
-  const padding = 80; // Increased padding to prevent edge clipping
-
-  const getLinearY = (w) => (w / 12) * (height * 0.35);
-  const getExponentialY = (w) => {
-    const growth = Math.exp(w * 0.38) - 1;
-    const maxGrowth = Math.exp(12 * 0.38) - 1;
-    return (growth / maxGrowth) * (height * 0.75);
-  };
-
-  const generatePath = (type) => {
-    let d = `M ${padding} ${height - padding}`;
-    for (let w = 0; w <= 12; w += 0.1) {
-      const x = padding + (w / 12) * (width - 2 * padding);
-      const y = height - padding - (type === 'linear' ? getLinearY(w) : getExponentialY(w));
-      d += ` L ${x} ${y}`;
-    }
-    return d;
-  };
-
-  const currentX = padding + (week / 12) * (width - 2 * padding);
-  const currentExpY = height - padding - getExponentialY(week);
-
-  // Live numbers
-  const rawProb = Math.min(99.9, (Math.exp(week * 0.4) - 1) * 2.2);
-  const displayProb = rawProb.toFixed(2);
-  const displayVelocity = Math.exp(week * 0.2).toFixed(2);
-
   return (
-    <div className="w-full max-w-6xl mx-auto mt-16 mb-12 px-4">
-      {/* REMOVED overflow-hidden to allow tooltip to extend beyond bounds if needed */}
-      <div className="bg-white border border-slate-200 rounded-3xl p-1 shadow-[0_32px_64px_-12px_rgba(0,0,0,0.06)] relative group">
-
-        {/* Header Overlay */}
-        <div className="absolute top-0 left-0 right-0 p-8 flex flex-col md:flex-row justify-between items-start md:items-center z-20 pointer-events-none">
-          <div>
-            <div className="inline-flex items-center gap-2 mb-3 text-blue-600 text-[10px] font-mono font-bold uppercase tracking-widest border border-blue-50 bg-blue-50/50 px-3 py-1.5 rounded-full">
-              <Activity className="w-3 h-3" />
-              Live Projection
-            </div>
-            <h3 className="text-2xl text-slate-900 font-bold tracking-tight">Velocity Delta</h3>
-          </div>
-
-          <div className="mt-4 md:mt-0 bg-white/80 backdrop-blur-md border border-slate-100 rounded-lg px-4 py-2 shadow-sm flex items-center gap-3">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Timeline</span>
-            <div className="w-px h-3 bg-slate-300"></div>
-            <span className="text-xs font-mono font-bold text-slate-700">Week {week.toFixed(1)}</span>
-          </div>
-        </div>
-
-        {/* The Graph Visual */}
-        {/* Added rounded-3xl and overflow-hidden HERE to clip the grid lines but NOT the tooltip if it floats out (tooltip is absolute in parent? no wait tooltip is inside here) */}
-        {/* Correction: The tooltip is inside this div. I will remove overflow-hidden from THIS div too, and apply border-radius via a background mask or separate container if needed. 
-            Actually, the safest way is to keep overflow-visible and ensure padding is sufficient. */}
-        <div className="relative h-[500px] w-full bg-white rounded-3xl" ref={containerRef}>
-          {/* Grid Background - Masked manually to respect rounded corners if needed, or just let it fill */}
-          <div className="absolute inset-0 bg-[linear-gradient(rgba(15,23,42,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(15,23,42,0.015)_1px,transparent_1px)] bg-[size:80px_80px] rounded-3xl"></div>
-
-          <svg preserveAspectRatio="none" width="100%" height="100%" viewBox={`0 0 ${width} ${height}`} className="absolute inset-0 overflow-visible pointer-events-none">
-            <defs>
-              <linearGradient id="expGradientLight" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#2563EB" stopOpacity="0.1" />
-                <stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-
-            {/* Axes */}
-            <line x1={padding} y1={height - padding} x2={width - padding} y2={height - padding} stroke="#F1F5F9" strokeWidth="2" />
-            <line x1={padding} y1={height - padding} x2={padding} y2={padding} stroke="#F1F5F9" strokeWidth="2" />
-
-            {/* Linear Ghost */}
-            <path d={generatePath('linear')} fill="none" stroke="#CBD5E1" strokeWidth="1" strokeDasharray="4 4" className="opacity-50" />
-            <text x={width - padding - 10} y={height - padding - getLinearY(12) - 10} textAnchor="end" fill="#94A3B8" fontSize="11" fontWeight="500" fontFamily="sans-serif">Standard Agency</text>
-
-            {/* Exponential Curve */}
-            <path d={generatePath('exponential')} fill="url(#expGradientLight)" stroke="#2563EB" strokeWidth="4" strokeLinecap="round" className="drop-shadow-md" />
-            <text x={width - padding - 10} y={height - padding - getExponentialY(12) - 15} textAnchor="end" fill="#2563EB" fontSize="14" fontWeight="800" fontFamily="sans-serif">ScaleX (e^x)</text>
-
-            {/* Scanner Line & Dot (Animated) */}
-            <line
-              x1={currentX} y1={padding} x2={currentX} y2={height - padding}
-              stroke="#2563EB" strokeWidth="1" strokeOpacity="0.15"
-              style={{ transition: 'x1 0.1s linear, x2 0.1s linear' }}
-            />
-            <circle
-              cx={currentX} cy={currentExpY} r="6"
-              fill="#2563EB" stroke="white" strokeWidth="2"
-              style={{ transition: 'cx 0.1s linear, cy 0.1s linear' }}
-            />
-          </svg>
-
-          {/* Precision Data Overlay */}
-          <div
-            className="absolute z-30 bg-white/95 backdrop-blur-xl border border-slate-100 rounded-xl shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex flex-col gap-1 pointer-events-none p-6 min-w-[200px]"
-            style={{
-              left: `${(currentX / width) * 100}%`,
-              top: `${(currentExpY / height) * 100}%`,
-              // Smart positioning: flip to left after week 6, smooth transition
-              transform: `translate(${week > 6 ? '-110%' : '10%'}, -50%)`,
-              transition: 'left 0.1s linear, top 0.1s linear, transform 0.3s ease-out'
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse`}></div>
-              <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Exponential Probability</span>
-            </div>
-
-            <div className="text-5xl font-bold text-slate-900 tabular-nums leading-none tracking-tighter">
-              {displayProb}%
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs font-mono">
-              <span className="text-slate-400">Velocity Factor</span>
-              <span className="text-blue-600 font-bold bg-blue-50 px-2 py-0.5 rounded flex items-center gap-1">
-                <TrendingUp className="w-3 h-3" />
-                {displayVelocity}x
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="min-h-[250px] md:min-h-[320px] flex items-center justify-center py-4">
+      <h1 className={`text-5xl md:text-[4.5rem] font-bold tracking-tighter text-slate-900 leading-[1.1] transition-opacity duration-500 ${fade ? 'opacity-100' : 'opacity-0'}`}>
+        {headlines[index].main} <br />
+        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
+          {headlines[index].highlight}
+        </span> <br />
+        {headlines[index].suffix}
+      </h1>
     </div>
   );
 };
+
+// --- COMPONENT: SYSTEM TIMELINE (14/28 DAYS) ---
+// --- COMPONENT: INTERACTIVE TIMELINE ---
+const SystemTimeline = () => {
+  const [activeStep, setActiveStep] = useState(0);
+  // Auto-advance timeline on mobile or if user hasn't interacted? Maybe keep manual for now for control.
+
+  const steps = [
+    {
+      id: "01",
+      title: "The Download",
+      day: "Day 0",
+      desc: "60-minute 'Brain Dump' call. No specs, just raw logic. We understand your vision before writing a single line of code.",
+      icon: MessageSquare,
+      tags: ["Strategy", "Discovery"],
+      color: "bg-blue-500"
+    },
+    {
+      id: "02",
+      title: "Architecture",
+      day: "Day 1-3",
+      desc: "Stack selection (Supabase + Next.js) & DB setup. We lay the foundation for a scalable application.",
+      icon: Database,
+      tags: ["Tech Stack", "Schema"],
+      color: "bg-indigo-500"
+    },
+    {
+      id: "03",
+      title: "The 'Ugly' Demo",
+      day: "Day 7",
+      desc: "Core feature works. Ugly UI, but data saves. You see the logic in action.",
+      icon: Layout,
+      tags: ["Validation", "Logic"],
+      color: "bg-purple-500"
+    },
+    {
+      id: "04",
+      title: "POC Delivery",
+      day: "Day 14",
+      desc: "Functional link. Decision Gate: Go to MVP or Stop? We prove the concept works.",
+      icon: CheckCircle2,
+      tags: ["Milestone", "Decision"],
+      color: "bg-green-500"
+    },
+    {
+      id: "05",
+      title: "The 'Glow Up'",
+      day: "Day 15-20",
+      desc: "UI/UX design, mobile responsiveness, animations. We make it look World-Class.",
+      icon: PenTool,
+      tags: ["UI/UX", "Design"],
+      color: "bg-pink-500"
+    },
+    {
+      id: "06",
+      title: "The Gates",
+      day: "Day 21-25",
+      desc: "Stripe, Auth, Admin Dashboards. All the production-grade features you need.",
+      icon: ShieldCheck,
+      tags: ["Payments", "Security"],
+      color: "bg-orange-500"
+    },
+    {
+      id: "07",
+      title: "The Stress Test",
+      day: "Day 26",
+      desc: "We break it. We fix what breaks. Ensuring stability before the big launch.",
+      icon: Activity,
+      tags: ["QA", "Testing"],
+      color: "bg-red-500"
+    },
+    {
+      id: "08",
+      title: "Handover",
+      day: "Day 28",
+      desc: "Code transfer, video walkthrough, 'Go Live'. Your business is open for business.",
+      icon: Rocket,
+      tags: ["Launch", "Handover"],
+      color: "bg-slate-900"
+    }
+  ];
+
+  return (
+    <section id="timeline" className="py-24 bg-slate-50 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
+
+      <div className="max-w-7xl mx-auto px-6">
+        <FadeIn>
+          <div className="text-center mb-16">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-100 text-[10px] font-bold text-blue-600 mb-6 uppercase tracking-widest">
+              <Activity className="w-3 h-3" />
+              How We Work
+            </div>
+            <h2 className="text-4xl md:text-5xl font-bold tracking-tighter text-slate-900 mb-6">
+              A Transparent Process. <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Designed for Speed.</span>
+            </h2>
+          </div>
+        </FadeIn>
+
+        {/* --- DESKTOP VIEW (Split) --- */}
+        <div className="hidden lg:flex gap-12 items-start">
+          {/* Navigation List */}
+          <div className="w-1/3 relative space-y-2">
+            <div className="absolute left-[27px] top-4 bottom-4 w-0.5 bg-slate-200"></div>
+
+            {steps.map((step, idx) => (
+              <button
+                key={step.id}
+                onClick={() => setActiveStep(idx)}
+                className={`group relative flex items-center gap-6 p-4 w-full text-left rounded-xl transition-all duration-300 ${activeStep === idx ? 'bg-white shadow-xl shadow-blue-900/5 ring-1 ring-slate-100 scale-105 z-10' : 'hover:bg-white/50 hover:pl-6'}`}
+              >
+                {/* Node */}
+                <div className={`relative z-10 w-14 h-14 rounded-full border-4 border-slate-50 flex items-center justify-center shrink-0 transition-colors duration-300 ${activeStep === idx ? 'bg-slate-900 text-white shadow-lg' : 'bg-white text-slate-400 border-slate-100 group-hover:border-blue-100 group-hover:text-blue-500'}`}>
+                  <span className="font-mono font-bold text-sm">{step.id}</span>
+                </div>
+
+                <div>
+                  <span className={`text-[10px] font-bold uppercase tracking-wider mb-1 block transition-colors ${activeStep === idx ? 'text-blue-600' : 'text-slate-400'}`}>
+                    {step.day}
+                  </span>
+                  <h3 className={`font-bold text-lg transition-colors ${activeStep === idx ? 'text-slate-900' : 'text-slate-500'}`}>
+                    {step.title}
+                  </h3>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Detailed View Sticky Area */}
+          <div className="w-2/3 sticky top-32 p-8">
+            <div className="relative aspect-[16/9] bg-white rounded-3xl border border-slate-100 shadow-2xl shadow-slate-200/50 overflow-hidden group">
+              <div className="absolute inset-0 bg-slate-50/50"></div>
+
+              {/* Decorative Elements */}
+              <div className={`absolute top-0 right-0 w-[400px] h-[400px] rounded-full blur-3xl opacity-10 transition-colors duration-500 ${steps[activeStep].color}`}></div>
+
+              <div className="relative h-full flex flex-col justify-center p-12 md:p-20 transition-all duration-500">
+                <div key={activeStep} className="animate-in fade-in slide-in-from-bottom-4 duration-500 ease-out">
+                  <div className="flex items-center gap-4 mb-8">
+                    <div className={`p-4 rounded-2xl ${steps[activeStep].color} text-white shadow-lg`}>
+                      {React.createElement(steps[activeStep].icon, { className: "w-8 h-8" })}
+                    </div>
+                    <span className="text-6xl font-black text-slate-100 select-none absolute right-10 top-10 opacity-20">
+                      {steps[activeStep].id}
+                    </span>
+                  </div>
+
+                  <h3 className="text-4xl font-bold text-slate-900 mb-6 tracking-tight">
+                    {steps[activeStep].title}
+                  </h3>
+
+                  <p className="text-xl text-slate-500 leading-relaxed mb-10 max-w-lg">
+                    {steps[activeStep].desc}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2">
+                    {steps[activeStep].tags.map(tag => (
+                      <span key={tag} className="px-4 py-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-600 uppercase tracking-wider shadow-sm">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* --- MOBILE VIEW (Horizontal Scroll) --- */}
+        <div className="lg:hidden">
+          <div className="flex overflow-x-auto pb-12 gap-4 snap-x snap-mandatory px-6 -mx-6 scrollbar-hide">
+            {steps.map((step, idx) => (
+              <div key={step.id} className="snap-center shrink-0 w-[85vw] max-w-sm">
+                <div className="h-full bg-white border border-slate-100 rounded-3xl p-8 shadow-xl shadow-slate-200/20 flex flex-col">
+                  <div className="flex justify-between items-start mb-6">
+                    <div className={`p-3 rounded-xl ${step.color} text-white shadow-md`}>
+                      {React.createElement(step.icon, { className: "w-6 h-6" })}
+                    </div>
+                    <span className="font-mono font-bold text-slate-200 text-3xl">{step.id}</span>
+                  </div>
+
+                  <span className="text-xs font-bold text-blue-600 uppercase tracking-widest mb-2 block">{step.day}</span>
+                  <h3 className="text-2xl font-bold text-slate-900 mb-4">{step.title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed mb-6 flex-1">
+                    {step.desc}
+                  </p>
+
+                  <div className="flex flex-wrap gap-2 mt-auto">
+                    {step.tags.map(tag => (
+                      <span key={tag} className="px-3 py-1 bg-slate-50 border border-slate-100 rounded-lg text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Mobile Scroll Indicator visually hinted by the overflow */}
+          <div className="flex justify-center gap-2 mt-4">
+            {steps.map((_, i) => (
+              <div key={i} className={`w-1.5 h-1.5 rounded-full transition-colors ${i === 0 ? 'bg-blue-600' : 'bg-slate-200'}`}></div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
 
 // --- COMPONENT: LOGO ---
 const BrandLogo = () => (
@@ -228,11 +350,11 @@ const TechStackIcon = ({ label }) => (
 
 // --- COMPONENT: SERVICE CARD ---
 const ServiceCard = ({ title, desc, icon: Icon, color }) => (
-  <div className="group relative bg-white p-8 rounded-2xl border border-slate-200 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 h-full flex flex-col">
+  <div className="group relative bg-white/80 backdrop-blur-xl p-8 rounded-2xl border border-white/20 shadow-xl shadow-slate-200/40 hover:shadow-2xl hover:shadow-blue-900/10 hover:-translate-y-1 transition-all duration-300 h-full flex flex-col">
     {/* Top Border Accent */}
     <div className={`absolute top-0 left-0 right-0 h-1 rounded-t-2xl ${color}`}></div>
 
-    <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 shadow-sm border border-slate-100">
       <Icon className="w-6 h-6 text-slate-700" />
     </div>
 
@@ -275,9 +397,9 @@ const BrowserWindow = ({ title, url, children }) => (
 
 // --- COMPONENT: PRICING / PACKAGE CARD ---
 const PackageCard = ({ title, days, price, subtitle, features, recommended }) => (
-  <div className={`relative p-8 rounded-3xl border flex flex-col h-full ${recommended ? 'bg-slate-900 text-white border-slate-800 shadow-2xl' : 'bg-white text-slate-900 border-slate-200'}`}>
+  <div className={`relative p-8 rounded-3xl border flex flex-col h-full transition-all duration-300 hover:-translate-y-1 ${recommended ? 'bg-slate-900 text-white border-slate-800 shadow-2xl shadow-blue-900/20' : 'bg-white/80 backdrop-blur-xl text-slate-900 border-white/20 shadow-xl shadow-slate-200/40'}`}>
     {recommended && (
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg shadow-blue-600/30">
         Most Popular
       </div>
     )}
@@ -305,11 +427,14 @@ const PackageCard = ({ title, days, price, subtitle, features, recommended }) =>
       ))}
     </div>
 
-    <button className={`w-full py-4 rounded-xl font-bold text-sm transition-all ${recommended ? 'bg-white text-slate-900 hover:bg-slate-100' : 'bg-slate-900 text-white hover:bg-slate-800'}`}>
+    <button className={`w-full py-4 rounded-xl font-bold text-sm transition-all ${recommended ? 'bg-white text-slate-900 hover:bg-slate-100' : 'bg-slate-900 text-white hover:bg-slate-800 shadow-lg shadow-slate-900/20'}`}>
       Start {days}-Day Sprint
     </button>
   </div>
 )
+
+// --- COMPONENT: GAP CHART (ANIMATED) ---
+
 
 // --- ALTERNATING TIMELINE COMPONENT ---
 const TimelineStep = ({ step, title, desc, icon: Icon, tags, side }) => {
@@ -356,6 +481,73 @@ const TimelineStep = ({ step, title, desc, icon: Icon, tags, side }) => {
     </FadeIn>
   )
 };
+
+// --- COMPONENT: BACKGROUND GRAPH ANIMATION ---
+// --- COMPONENT: BACKGROUND GRAPH ANIMATION ---
+const BackgroundGraph = () => {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      <svg
+        className="absolute w-full h-full opacity-40"
+        viewBox="0 0 100 100"
+        preserveAspectRatio="none"
+      >
+        <defs>
+          <linearGradient id="area-gradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#818CF8" stopOpacity="0.1" />
+            <stop offset="100%" stopColor="#2563EB" stopOpacity="0" />
+          </linearGradient>
+          <linearGradient id="line-gradient" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stopColor="#2563EB" stopOpacity="0.8" />
+            <stop offset="50%" stopColor="#818CF8" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#C084FC" stopOpacity="0.8" />
+          </linearGradient>
+        </defs>
+
+        {/* Small Grid Pattern */}
+        <pattern id="smallGrid" width="4" height="4" patternUnits="userSpaceOnUse">
+          <path d="M 4 0 L 0 0 0 4" fill="none" stroke="rgba(148, 163, 184, 0.2)" strokeWidth="0.5" />
+        </pattern>
+        <rect width="100" height="100" fill="url(#smallGrid)" />
+
+        {/* Exponential Curve Line (Lowered peak to y=30 to avoid text overlap) */}
+        <path
+          d="M 5 95 C 40 95, 70 80, 95 30"
+          fill="none"
+          stroke="url(#line-gradient)"
+          strokeWidth="0.8"
+          strokeLinecap="round"
+          className="animate-draw-line"
+        >
+          <animate
+            attributeName="stroke-dasharray"
+            from="0, 1000"
+            to="1000, 0"
+            dur="3s"
+            fill="freeze"
+          />
+        </path>
+
+        {/* Moving Particle along the path */}
+        <circle r="1.5" fill="#C084FC" className="animate-pulse shadow-lg shadow-purple-500">
+          <animateMotion
+            dur="3s"
+            repeatCount="indefinite"
+            path="M 5 95 C 40 95, 70 80, 95 30"
+          />
+        </circle>
+
+        {/* Data Points (Static decoration) */}
+        <circle cx="5" cy="95" r="1" fill="#94A3B8" />
+        <circle cx="95" cy="95" r="1" fill="#94A3B8" />
+        <circle cx="5" cy="30" r="1" fill="#94A3B8" />
+      </svg>
+
+      {/* Soft Glow at the peak */}
+      <div className="absolute top-[30%] right-[-5%] w-[40vw] h-[40vw] bg-blue-500/10 blur-[100px] rounded-full mix-blend-multiply"></div>
+    </div>
+  )
+}
 
 export default function App() {
   const [scrolled, setScrolled] = useState(false);
@@ -405,40 +597,41 @@ export default function App() {
         </div>
       </nav>
 
+
       {/* --- HERO SECTION --- */}
       <section className="pt-32 pb-10 px-6 relative overflow-hidden">
-        {/* Subtle Background Pattern */}
-        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-40 -z-10"></div>
+        {/* Background Graph */}
+        <BackgroundGraph />
 
-        <div className="max-w-7xl mx-auto mt-20">
+        {/* Subtle Background Pattern & Blobs (Existing - reduced opacity slightly to let graph show) */}
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 -z-10"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-100/40 rounded-full blur-3xl -z-20 opacity-60 mix-blend-multiply"></div>
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/40 rounded-full blur-3xl -z-20 opacity-60 mix-blend-multiply"></div>
+
+        <div className="max-w-7xl mx-auto mt-20 relative z-10">
           <div className="max-w-4xl mx-auto text-center mb-16">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-600 mb-8 uppercase tracking-widest shadow-sm">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500"></span>
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/80 backdrop-blur-sm border border-slate-200 text-[11px] font-bold text-slate-600 mb-8 uppercase tracking-widest shadow-sm">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span>
               Accepting Q4 Projects
             </div>
 
-            <h1 className="text-6xl md:text-[5.5rem] font-bold tracking-tighter text-slate-900 mb-8 leading-[0.95] -ml-1">
-              BUILD YOUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">MVP</span> <br />
-              AND GET YOUR <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">FIRST CUSTOMERS</span> <br />
-              IN <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-blue-500">21 DAYS</span>
-            </h1>
+            <HeroHeadlineRotator />
 
             <p className="text-xl md:text-2xl text-slate-500 max-w-3xl mx-auto leading-relaxed font-light mb-12">
-              We build your MVP fast and help you <span className="text-slate-900 font-medium">market it</span>, turning your vision into a <span className="text-slate-900 font-medium">validated business</span> with rapid market entry.
+              Most founders spend $50k just to find out nobody wants their app. <span className="text-slate-900 font-medium">Spend 14 days</span> and a fraction of the cost to find out the truth.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-5">
-              <button onClick={() => setCalModalOpen(true)} className="bg-slate-900 text-white px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-900/10 group">
-                Book Your Sprint <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              <button onClick={() => setCalModalOpen(true)} className="bg-slate-900 text-white px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-900/20 hover:shadow-blue-900/40 hover:-translate-y-1 group">
+                Start My 14-Day Sprint <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
-              <button className="bg-white text-slate-900 border border-slate-200 px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2">
-                View Architecture
-              </button>
+              <a href="#timeline" className="bg-white/80 backdrop-blur-sm text-slate-900 border border-slate-200 px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-white transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:-translate-y-1">
+                See the Timeline
+              </a>
             </div>
           </div>
 
-          {/* EXPONENTIAL GRAPH */}
-          <ExponentialSuccessGraph />
+
 
           {/* TECH STACK STRIP */}
           <FadeIn delay={200}>
@@ -455,8 +648,17 @@ export default function App() {
         </div>
       </section>
 
+      {/* --- SPEED ADVANTAGE SECTION --- */}
+
+
+      {/* --- SYSTEM TIMELINE --- */}
+      <SystemTimeline />
+
       {/* --- CAPABILITIES --- */}
-      <section id="capabilities" className="py-32 bg-slate-50/50 border-t border-slate-200 relative">
+      <section id="capabilities" className="py-32 bg-slate-50/50 border-t border-slate-200 relative overflow-hidden">
+        {/* Decorative Blobs */}
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-purple-100/40 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2 mix-blend-multiply"></div>
+
         <div className="max-w-7xl mx-auto px-6">
           <FadeIn>
             <div className="text-center max-w-2xl mx-auto mb-20">
@@ -474,6 +676,7 @@ export default function App() {
                 desc="Transform your SaaS idea into a stunning, conversion-optimized landing page that attracts users."
                 icon={Layout}
                 color="bg-purple-500"
+                className="bg-white/80 backdrop-blur-xl border-white/20 shadow-xl"
               />
             </FadeIn>
             <FadeIn delay={200} className="h-full">
@@ -482,6 +685,7 @@ export default function App() {
                 desc="Get your minimum viable product built and launched in 2 weeks. We help you validate quickly."
                 icon={Code2}
                 color="bg-blue-500"
+                className="bg-white/80 backdrop-blur-xl border-white/20 shadow-xl"
               />
             </FadeIn>
             <FadeIn delay={300} className="h-full">
@@ -490,6 +694,7 @@ export default function App() {
                 desc="Keep your product running smoothly with our ongoing support. Bug fixes, updates, and improvements."
                 icon={Wrench}
                 color="bg-orange-500"
+                className="bg-white/80 backdrop-blur-xl border-white/20 shadow-xl"
               />
             </FadeIn>
             <FadeIn delay={400} className="h-full">
@@ -498,6 +703,7 @@ export default function App() {
                 desc="Have something unique in mind? Let's build a tailored solution that fits your vision perfectly."
                 icon={PenTool}
                 color="bg-pink-500"
+                className="bg-white/80 backdrop-blur-xl border-white/20 shadow-xl"
               />
             </FadeIn>
           </div>
@@ -506,6 +712,9 @@ export default function App() {
 
       {/* --- ALTERNATING PROCESS TIMELINE --- */}
       <section id="process" className="py-32 bg-white border-y border-slate-100 relative overflow-hidden">
+        {/* Decorative Blobs */}
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-50/50 rounded-full blur-3xl -z-10 translate-x-1/3 translate-y-1/3"></div>
+
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <FadeIn>
             <div className="text-center mb-24">
@@ -623,7 +832,10 @@ export default function App() {
       </section>
 
       {/* --- ENGAGEMENT MODELS --- */}
-      <section id="pricing" className="py-32 bg-white border-t border-slate-200">
+      <section id="pricing" className="py-32 bg-white border-t border-slate-200 relative overflow-hidden">
+        {/* Decorative Blobs */}
+        <div className="absolute top-0 left-1/2 w-[800px] h-[800px] bg-slate-100/50 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2"></div>
+
         <div className="max-w-7xl mx-auto px-6">
           <FadeIn>
             <div className="text-center mb-16">
