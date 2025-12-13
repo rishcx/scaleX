@@ -24,6 +24,7 @@ import {
   Wrench,
   Rocket
 } from 'lucide-react';
+import scalexLogo from './assets/scalex-logo.png';
 
 // --- UTILS: SCROLL OBSERVER ---
 const useOnScreen = (options) => {
@@ -332,11 +333,12 @@ const SystemTimeline = () => {
 
 // --- COMPONENT: LOGO ---
 const BrandLogo = () => (
-  <div className="flex items-baseline group cursor-pointer select-none relative">
-    {/* Text Only Logo */}
-    <span className="text-3xl font-medium tracking-tight text-slate-700 group-hover:text-slate-900 transition-colors">scale</span>
-    {/* Styled superscript x */}
-    <sup className="text-xl font-black text-slate-900 -top-2 ml-0.5 tracking-tighter group-hover:text-blue-600 transition-colors" style={{ fontFamily: 'ui-sans-serif, system-ui' }}>x</sup>
+  <div className="flex items-center group cursor-pointer select-none relative">
+    <img 
+      src={scalexLogo} 
+      alt="ScaleX Logo" 
+      className="h-12 w-auto group-hover:opacity-90 transition-opacity"
+    />
   </div>
 );
 
@@ -367,6 +369,44 @@ const ServiceCard = ({ title, desc, icon: Icon, color }) => (
   </div>
 )
 
+// --- COMPONENT: SUMMONLM LOGO ---
+const SummonLMLogo = ({ className = "w-8 h-8" }) => (
+  <svg className={className} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+    {/* Central Circle */}
+    <circle cx="16" cy="16" r="4" fill="#0f172a" />
+
+    {/* 8 Arrows pointing outward */}
+    {[0, 45, 90, 135, 180, 225, 270, 315].map((angle, idx) => {
+      const rad = (angle * Math.PI) / 180;
+      const startX = 16 + 4 * Math.cos(rad);
+      const startY = 16 + 4 * Math.sin(rad);
+      const endX = 16 + 12 * Math.cos(rad);
+      const endY = 16 + 12 * Math.sin(rad);
+      const arrowHeadX = 16 + 14 * Math.cos(rad);
+      const arrowHeadY = 16 + 14 * Math.sin(rad);
+
+      // Arrow head points
+      const arrowAngle1 = ((angle - 20) * Math.PI) / 180;
+      const arrowAngle2 = ((angle + 20) * Math.PI) / 180;
+      const headX1 = arrowHeadX - 1.5 * Math.cos(arrowAngle1);
+      const headY1 = arrowHeadY - 1.5 * Math.sin(arrowAngle1);
+      const headX2 = arrowHeadX - 1.5 * Math.cos(arrowAngle2);
+      const headY2 = arrowHeadY - 1.5 * Math.sin(arrowAngle2);
+
+      return (
+        <g key={idx}>
+          {/* Arrow line */}
+          <line x1={startX} y1={startY} x2={endX} y2={endY} stroke="#0f172a" strokeWidth="1.5" strokeLinecap="round" />
+          {/* Arrow head */}
+          <path d={`M ${arrowHeadX} ${arrowHeadY} L ${headX1} ${headY1} L ${headX2} ${headY2} Z`} fill="#0f172a" />
+          {/* Small circle at base */}
+          <circle cx={startX} cy={startY} r="1" fill="#0f172a" />
+        </g>
+      );
+    })}
+  </svg>
+);
+
 // --- COMPONENT: BROWSER WINDOW CASE STUDY ---
 const BrowserWindow = ({ title, url, children }) => (
   <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden flex flex-col h-full hover:translate-y-[-4px] transition-transform duration-500 group">
@@ -395,8 +435,46 @@ const BrowserWindow = ({ title, url, children }) => (
   </div>
 )
 
+// --- COMPONENT: TESTIMONIAL CARD ---
+const TestimonialCard = ({ quote, name, role, company, credentials, initials, type = "client" }) => (
+  <div className="bg-white rounded-2xl border border-slate-200 p-8 shadow-lg hover:shadow-xl transition-all duration-300 h-full flex flex-col relative">
+    {/* Badge */}
+    <div className={`absolute top-6 right-6 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${type === "client"
+        ? "bg-blue-50 text-blue-700 border border-blue-200"
+        : "bg-purple-50 text-purple-700 border border-purple-200"
+      }`}>
+      {type === "client" ? "Client" : "Consultant"}
+    </div>
+
+    {/* Quote */}
+    <div className="mb-6 flex-1">
+      <svg className="w-8 h-8 text-blue-500 mb-4" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.432.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+      </svg>
+      <p className="text-slate-700 text-lg leading-relaxed font-medium">{quote}</p>
+    </div>
+
+    {/* Author Info */}
+    <div className="flex items-center gap-4 pt-6 border-t border-slate-100">
+      <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg shrink-0 ${type === "client"
+          ? "bg-gradient-to-br from-blue-500 to-indigo-600"
+          : "bg-gradient-to-br from-purple-500 to-pink-600"
+        }`}>
+        {initials}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="font-bold text-slate-900">{name}</div>
+        <div className="text-sm text-slate-600">{role}</div>
+        {credentials && (
+          <div className="text-xs text-slate-500 mt-1">{credentials}</div>
+        )}
+      </div>
+    </div>
+  </div>
+)
+
 // --- COMPONENT: PRICING / PACKAGE CARD ---
-const PackageCard = ({ title, days, price, subtitle, features, recommended }) => (
+const PackageCard = ({ title, days, price, subtitle, features, recommended, guarantee }) => (
   <div className={`relative p-8 rounded-3xl border flex flex-col h-full transition-all duration-300 hover:-translate-y-1 ${recommended ? 'bg-slate-900 text-white border-slate-800 shadow-2xl shadow-blue-900/20' : 'bg-white/80 backdrop-blur-xl text-slate-900 border-white/20 shadow-xl shadow-slate-200/40'}`}>
     {recommended && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full shadow-lg shadow-blue-600/30">
@@ -416,6 +494,11 @@ const PackageCard = ({ title, days, price, subtitle, features, recommended }) =>
       <div className="flex items-baseline gap-1">
         <span className="text-4xl font-bold tracking-tight">{price}</span>
       </div>
+      {guarantee && (
+        <div className="text-emerald-500 text-xs font-bold mt-2">
+          {guarantee}
+        </div>
+      )}
     </div>
 
     <div className="flex-1 space-y-4 mb-8">
@@ -437,26 +520,91 @@ const PackageCard = ({ title, days, price, subtitle, features, recommended }) =>
 
 
 // --- ALTERNATING TIMELINE COMPONENT ---
-const TimelineStep = ({ step, title, desc, icon: Icon, tags, side }) => {
+const TimelineStep = ({ day, title, desc, icon: Icon, tags, side, tagColor = "blue", iconColor = null }) => {
+  const tagColorClasses = {
+    blue: {
+      tagBg: "bg-blue-50/60",
+      tagText: "text-blue-700"
+    },
+    purple: {
+      tagBg: "bg-purple-50/60",
+      tagText: "text-purple-700"
+    },
+    pink: {
+      tagBg: "bg-pink-50/60",
+      tagText: "text-pink-700"
+    },
+    green: {
+      tagBg: "bg-green-50/60",
+      tagText: "text-green-700"
+    },
+    indigo: {
+      tagBg: "bg-indigo-50/60",
+      tagText: "text-indigo-700"
+    },
+    slate: {
+      tagBg: "bg-slate-50/60",
+      tagText: "text-slate-700"
+    },
+    emerald: {
+      tagBg: "bg-emerald-50/60",
+      tagText: "text-emerald-700"
+    }
+  };
+
+  const iconColorClasses = {
+    blue: {
+      iconBg: "bg-blue-600",
+      iconText: "text-white"
+    },
+    purple: {
+      iconBg: "bg-purple-600",
+      iconText: "text-white"
+    },
+    pink: {
+      iconBg: "bg-pink-600",
+      iconText: "text-white"
+    },
+    green: {
+      iconBg: "bg-green-600",
+      iconText: "text-white"
+    },
+    indigo: {
+      iconBg: "bg-indigo-600",
+      iconText: "text-white"
+    },
+    slate: {
+      iconBg: "bg-slate-700",
+      iconText: "text-white"
+    },
+    emerald: {
+      iconBg: "bg-emerald-600",
+      iconText: "text-white"
+    }
+  };
+
+  const tagColors = tagColorClasses[tagColor] || tagColorClasses.blue;
+  const finalIconColor = iconColor || tagColor;
+  const iconColors = iconColorClasses[finalIconColor] || iconColorClasses.blue;
+
   return (
     <FadeIn>
-      <div className={`flex flex-col md:flex-row items-center gap-8 md:gap-16 relative w-full ${side === 'right' ? 'md:flex-row-reverse' : ''}`}>
+      <div className={`flex flex-col md:flex-row items-start relative w-full ${side === 'right' ? 'md:flex-row-reverse' : ''}`}>
 
         {/* 1. TEXT CONTENT SIDE */}
-        <div className={`md:w-1/2 flex flex-col ${side === 'right' ? 'md:items-start' : 'md:items-end md:text-right'}`}>
-          <div className="flex items-center gap-3 mb-3">
-            <span className="text-blue-600 font-mono text-sm font-bold bg-blue-50 px-2 py-1 rounded border border-blue-100">
-              {step}
+        <div className={`md:w-1/2 flex flex-col ${side === 'right' ? 'md:items-start md:text-left md:pl-8' : 'md:items-end md:text-right md:pr-8'}`}>
+          <div className={`mb-3 ${side === 'right' ? 'self-start' : 'self-end'}`}>
+            <span className="text-xs font-bold uppercase tracking-wider px-3 py-1.5 rounded bg-slate-50/60 text-slate-700">
+              {day}
             </span>
-            <div className="h-px w-12 bg-slate-200"></div>
           </div>
           <h3 className="text-2xl font-bold text-slate-900 mb-3 tracking-tight">{title}</h3>
-          <p className="text-slate-500 text-sm leading-relaxed max-w-sm mb-6">
+          <p className="text-slate-500 text-sm leading-relaxed max-w-md mb-4">
             {desc}
           </p>
           <div className={`flex flex-wrap gap-2 ${side === 'right' ? 'justify-start' : 'justify-end'}`}>
             {tags.map(t => (
-              <span key={t} className="text-[10px] font-bold text-slate-400 uppercase tracking-wider border border-slate-100 px-2 py-1 rounded bg-slate-50">
+              <span key={t} className={`text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded ${tagColors.tagBg} ${tagColors.tagText}`}>
                 {t}
               </span>
             ))}
@@ -464,11 +612,9 @@ const TimelineStep = ({ step, title, desc, icon: Icon, tags, side }) => {
         </div>
 
         {/* 2. CENTER ICON NODE */}
-        <div className="absolute left-1/2 top-0 -translate-x-1/2 flex flex-col items-center h-full z-10 hidden md:flex">
-          <div className="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center relative z-20 group hover:scale-110 hover:border-blue-500 transition-all duration-300">
-            <Icon className="w-5 h-5 text-slate-700 group-hover:text-blue-600 transition-colors" />
-            {/* Pulse Effect behind icon */}
-            <div className="absolute inset-0 bg-blue-100 rounded-xl -z-10 opacity-0 group-hover:opacity-50 blur-lg transition-opacity"></div>
+        <div className="absolute left-1/2 top-0 -translate-x-1/2 flex flex-col items-center z-10 hidden md:flex">
+          <div className={`w-10 h-10 rounded-full ${iconColors.iconBg} flex items-center justify-center relative z-20 shadow-lg ring-4 ring-white`}>
+            <Icon className={`w-5 h-5 ${iconColors.iconText}`} />
           </div>
         </div>
 
@@ -488,7 +634,7 @@ const BackgroundGraph = () => {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       <svg
-        className="absolute w-full h-full opacity-40"
+        className="absolute w-full h-full opacity-20"
         viewBox="0 0 100 100"
         preserveAspectRatio="none"
       >
@@ -605,8 +751,8 @@ export default function App() {
 
         {/* Subtle Background Pattern & Blobs (Existing - reduced opacity slightly to let graph show) */}
         <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:24px_24px] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-20 -z-10"></div>
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-100/40 rounded-full blur-3xl -z-20 opacity-60 mix-blend-multiply"></div>
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/40 rounded-full blur-3xl -z-20 opacity-60 mix-blend-multiply"></div>
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-blue-100/20 rounded-full blur-3xl -z-20 opacity-40 mix-blend-multiply"></div>
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-indigo-100/20 rounded-full blur-3xl -z-20 opacity-40 mix-blend-multiply"></div>
 
         <div className="max-w-7xl mx-auto mt-20 relative z-10">
           <div className="max-w-4xl mx-auto text-center mb-16">
@@ -625,7 +771,7 @@ export default function App() {
               <button onClick={() => setCalModalOpen(true)} className="bg-slate-900 text-white px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-2xl shadow-blue-900/20 hover:shadow-blue-900/40 hover:-translate-y-1 group">
                 Start My 14-Day Sprint <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
-              <a href="#timeline" className="bg-white/80 backdrop-blur-sm text-slate-900 border border-slate-200 px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-white transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:-translate-y-1">
+              <a href="#process" className="bg-white/80 backdrop-blur-sm text-slate-900 border border-slate-200 px-8 py-4 rounded-xl text-[15px] font-bold hover:bg-white transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:-translate-y-1">
                 See the Timeline
               </a>
             </div>
@@ -651,13 +797,10 @@ export default function App() {
       {/* --- SPEED ADVANTAGE SECTION --- */}
 
 
-      {/* --- SYSTEM TIMELINE --- */}
-      <SystemTimeline />
-
       {/* --- CAPABILITIES --- */}
       <section id="capabilities" className="py-32 bg-slate-50/50 border-t border-slate-200 relative overflow-hidden">
         {/* Decorative Blobs */}
-        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-purple-100/40 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2 mix-blend-multiply"></div>
+        <div className="absolute top-1/2 left-0 w-[500px] h-[500px] bg-purple-100/20 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2 mix-blend-multiply"></div>
 
         <div className="max-w-7xl mx-auto px-6">
           <FadeIn>
@@ -710,16 +853,21 @@ export default function App() {
         </div>
       </section>
 
-      {/* --- ALTERNATING PROCESS TIMELINE --- */}
-      <section id="process" className="py-32 bg-white border-y border-slate-100 relative overflow-hidden">
+      {/* --- PROCESS TIMELINE --- */}
+      <section id="process" className="py-24 bg-white border-y border-slate-100 relative overflow-hidden">
         {/* Decorative Blobs */}
-        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-50/50 rounded-full blur-3xl -z-10 translate-x-1/3 translate-y-1/3"></div>
+        <div className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-blue-50/30 rounded-full blur-3xl -z-10 translate-x-1/3 translate-y-1/3"></div>
 
         <div className="max-w-7xl mx-auto px-6 relative z-10">
           <FadeIn>
-            <div className="text-center mb-24">
-              <h2 className="text-4xl font-bold tracking-tighter mb-4">How We Work.</h2>
-              <p className="text-slate-500">A transparent, high-velocity process designed for speed.</p>
+            <div className="text-center mb-16">
+              <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
+                THE 28-DAY FOUNDER SPRINT
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-slate-900">
+                From Idea to Revenue <br />
+                <span className="text-blue-600">in 4 Weeks.</span>
+              </h2>
             </div>
           </FadeIn>
 
@@ -727,42 +875,61 @@ export default function App() {
             {/* Central Timeline Line (Desktop) */}
             <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-200 -translate-x-1/2 hidden md:block"></div>
 
-            <div className="space-y-24">
+            <div className="space-y-8 md:space-y-10">
 
               <TimelineStep
-                step="01"
+                day="DAY 0"
                 side="left"
-                title="Discovery Call"
-                desc="We discuss your vision, market opportunity, and technical requirements to ensure perfect alignment."
+                title="The Brain Dump"
+                desc="Strategy & Discovery. We extract your vision, challenge your assumptions, and define the absolute minimum viable product."
                 icon={MessageSquare}
-                tags={['Strategy', 'Audit']}
+                tags={['STRATEGY', 'SCOPE']}
+                tagColor="blue"
+                iconColor="blue"
               />
 
               <TimelineStep
-                step="02"
+                day="DAY 7"
                 side="right"
-                title="Strategic Planning"
-                desc="Together, we create a roadmap that includes core features, tech stack decisions, and timelines."
-                icon={GitBranch}
-                tags={['Roadmap', 'Tech Stack']}
+                title="The 'Ugly' Demo"
+                desc="Core Logic Validation. Ugly UI, but data saves and the logic works. You see your idea breathing for the first time."
+                icon={Layout}
+                tags={['VALIDATION', 'LOGIC']}
+                tagColor="indigo"
+                iconColor="indigo"
               />
 
               <TimelineStep
-                step="03"
+                day="DAY 14"
                 side="left"
-                title="Rapid Development"
-                desc="Our agents build your MVP with regular demos and feedback loops to ensure we hit the mark."
-                icon={Terminal}
-                tags={['Sprints', 'Code']}
+                title="The Decision Gate"
+                desc="Go/No-Go. We deliver a functional POC. You decide: pivot, kill it, or double down and build the full MVP."
+                icon={CheckCircle2}
+                tags={['DECISION', 'POC']}
+                tagColor="purple"
+                iconColor="purple"
               />
 
               <TimelineStep
-                step="04"
+                day="DAY 21"
                 side="right"
-                title="Launch & Growth"
-                desc="We deploy your MVP and provide guidance on user acquisition and scaling strategies."
-                icon={ArrowUpRight}
-                tags={['Deploy', 'Scale']}
+                title="The Polish"
+                desc="Production Grade. We add Stripe payments, Authentication, Admin Dashboards, and world-class UI/UX."
+                icon={PenTool}
+                tags={['PAYMENTS', 'DESIGN']}
+                tagColor="slate"
+                iconColor="slate"
+              />
+
+              <TimelineStep
+                day="DAY 28"
+                side="left"
+                title="The Launch"
+                desc="Handover & Scale. Your business is open for business. We hand over the code, the keys, and the documentation."
+                icon={Rocket}
+                tags={['LAUNCH', 'SCALE']}
+                tagColor="emerald"
+                iconColor="emerald"
               />
 
             </div>
@@ -774,58 +941,142 @@ export default function App() {
       <section id="work" className="py-32 bg-slate-50 border-t border-slate-200">
         <div className="max-w-7xl mx-auto px-6">
           <FadeIn>
-            <div className="flex justify-between items-end mb-16">
-              <div>
-                <h2 className="text-4xl font-bold tracking-tighter mb-4 text-slate-900">Explore Our Work.</h2>
-                <p className="text-slate-500 max-w-xl">
-                  Real projects, real results. See what we've built for startups just like yours.
-                </p>
-              </div>
-              <button className="hidden md:flex items-center gap-2 text-sm font-bold border-b-2 border-slate-900 pb-1 hover:text-blue-600 hover:border-blue-600 transition-all">
-                View all projects <ArrowRight className="w-4 h-4" />
-              </button>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl md:text-5xl font-bold tracking-tighter mb-4 text-slate-900">Explore Our Work.</h2>
+              <p className="text-slate-500 max-w-2xl mx-auto text-lg">
+                Real projects, real results. See what we've built for startups just like yours.
+              </p>
             </div>
           </FadeIn>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 h-auto md:h-[400px]">
-            <FadeIn delay={100} className="h-full">
-              <BrowserWindow title="FinTech Dashboard" url="app.finance-ai.com">
-                <div className="w-full h-full bg-slate-100 p-4">
-                  <div className="w-full h-full bg-white rounded-lg border border-slate-200 p-4 shadow-sm">
-                    <div className="flex gap-4 mb-4">
-                      <div className="w-1/3 h-24 bg-blue-50 rounded"></div>
-                      <div className="w-1/3 h-24 bg-slate-50 rounded"></div>
-                      <div className="w-1/3 h-24 bg-slate-50 rounded"></div>
+          <div className="max-w-5xl mx-auto">
+            <FadeIn delay={100}>
+              <BrowserWindow title="SummonLM - GEO Platform" url="http://summonlm.com">
+                <div className="w-full h-full bg-white p-6 flex flex-col">
+                  {/* Header */}
+                  <div className="mb-6">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className="w-8 h-8 flex items-center justify-center">
+                        <SummonLMLogo className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Featured Project</div>
+                        <div className="text-base font-bold text-slate-900">SummonLM</div>
+                      </div>
                     </div>
-                    <div className="w-full h-32 bg-slate-50 rounded"></div>
+                    <h3 className="text-2xl font-bold text-slate-900 mb-2 leading-tight">
+                      Summon your brand in <span className="text-blue-600">LLM responses</span>
+                    </h3>
+                    <p className="text-slate-600 text-sm">
+                      Let's ensure your brand dominates the new age of AI-powered search. Own the future of traffic and conversions by appearing in LLM responses.
+                    </p>
+                  </div>
+
+                  {/* Dashboard Preview */}
+                  <div className="bg-slate-50 rounded-xl border border-slate-200 p-5 flex-1">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                        <div className="text-xs font-bold text-slate-700">Live Dashboard</div>
+                      </div>
+                    </div>
+
+                    {/* AI Mentions */}
+                    <div className="mb-5 p-4 bg-white rounded-lg border border-slate-200">
+                      <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">AI Mentions</div>
+                      <div className="flex items-baseline gap-2">
+                        <div className="text-3xl font-black text-slate-900">2.5K+</div>
+                        <div className="text-xs text-green-600 font-bold">+340% ↑</div>
+                      </div>
+                      <div className="text-xs text-slate-500 mt-1">AI Mentions</div>
+                    </div>
+
+                    {/* LLM Models */}
+                    <div className="mb-5">
+                      <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2">LLM Models</div>
+                      <div className="flex flex-wrap gap-2">
+                        {['OpenAI', 'Gemini', 'Perplexity', 'Claude', 'Grok'].map((model, idx) => (
+                          <div key={idx} className="px-2.5 py-1 bg-white rounded-md border border-slate-200">
+                            <span className="text-xs font-semibold text-slate-700">{model}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* GEO Performance */}
+                    <div>
+                      <div className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-3">GEO Performance</div>
+                      <div className="space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-semibold text-slate-700">Brand Mentions</span>
+                            <span className="text-xs font-bold text-slate-900">85%</span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-emerald-500 to-teal-600 rounded-full" style={{ width: '85%' }}></div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-semibold text-slate-700">Positive Sentiment</span>
+                            <span className="text-xs font-bold text-slate-900">72%</span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full" style={{ width: '72%' }}></div>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span className="text-xs font-semibold text-slate-700">Citation Quality</span>
+                            <span className="text-xs font-bold text-slate-900">68%</span>
+                          </div>
+                          <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div className="h-full bg-gradient-to-r from-purple-500 to-pink-600 rounded-full" style={{ width: '68%' }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </BrowserWindow>
             </FadeIn>
+          </div>
+        </div>
+      </section>
 
-            <FadeIn delay={200} className="h-full">
-              <BrowserWindow title="Legal SaaS Platform" url="discovery.legal.io">
-                <div className="w-full h-full bg-slate-100 p-4 flex gap-4">
-                  <div className="w-1/4 h-full bg-white rounded-lg border border-slate-200"></div>
-                  <div className="w-3/4 h-full bg-white rounded-lg border border-slate-200 p-3 space-y-2">
-                    <div className="w-full h-4 bg-slate-50 rounded"></div>
-                    <div className="w-2/3 h-4 bg-slate-50 rounded"></div>
-                    <div className="w-full h-20 bg-blue-50 rounded mt-4"></div>
-                  </div>
-                </div>
-              </BrowserWindow>
+      {/* --- TESTIMONIALS --- */}
+      <section className="py-32 bg-white border-t border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <FadeIn>
+            <div className="text-center mb-16">
+              <h2 className="text-4xl font-bold tracking-tighter mb-4 text-slate-900">What Our Clients & Consultants Say.</h2>
+              <p className="text-slate-500 max-w-xl mx-auto">
+                Real feedback from founders who've worked with us, and the world-class consultants helping us grow.
+              </p>
+            </div>
+          </FadeIn>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            <FadeIn delay={100}>
+              <TestimonialCard
+                quote="ScaleX built our POC end-to-end. The speed and quality were exceptional. We are extremely happy with the product."
+                name="IIT"
+                role="Co-founder @ SummonLM"
+                credentials="Ex-Meesho | Ex-Flipkart | IIT Roorkee'23"
+                initials="IIT"
+                type="client"
+              />
             </FadeIn>
 
-            <FadeIn delay={300} className="h-full">
-              <BrowserWindow title="E-commerce Analytics" url="shop-insights.co">
-                <div className="w-full h-full bg-slate-100 p-4 space-y-3">
-                  <div className="flex justify-between">
-                    <div className="w-20 h-6 bg-white rounded"></div>
-                    <div className="w-6 h-6 bg-blue-500 rounded-full"></div>
-                  </div>
-                  <div className="w-full h-full bg-white rounded-lg border border-slate-200"></div>
-                </div>
-              </BrowserWindow>
+            <FadeIn delay={200}>
+              <TestimonialCard
+                quote="World-Class Team"
+                name="Aayush Agarwal"
+                role="Inito"
+                credentials="Ex-Groww | CFA L3 Cleared"
+                initials="AA"
+                type="consultant"
+              />
             </FadeIn>
           </div>
         </div>
@@ -834,7 +1085,7 @@ export default function App() {
       {/* --- ENGAGEMENT MODELS --- */}
       <section id="pricing" className="py-32 bg-white border-t border-slate-200 relative overflow-hidden">
         {/* Decorative Blobs */}
-        <div className="absolute top-0 left-1/2 w-[800px] h-[800px] bg-slate-100/50 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute top-0 left-1/2 w-[800px] h-[800px] bg-slate-100/30 rounded-full blur-3xl -z-10 -translate-x-1/2 -translate-y-1/2"></div>
 
         <div className="max-w-7xl mx-auto px-6">
           <FadeIn>
@@ -847,10 +1098,11 @@ export default function App() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto h-auto md:h-[600px]">
             <FadeIn delay={100} className="h-full">
               <PackageCard
-                title="The POC Sprint"
+                title="POC Sprint"
                 days="14"
                 subtitle="Validate your core idea technically."
-                price="Start Up"
+                price="$499"
+                guarantee="14-day delivery or we work free."
                 features={[
                   "Custom-designed landing page",
                   "Core Logic Validation",
@@ -864,17 +1116,18 @@ export default function App() {
 
             <FadeIn delay={200} className="h-full">
               <PackageCard
-                title="The MVP Sprint"
+                title="MVP Sprint"
                 days="21"
                 subtitle="Go live with a market-ready product."
-                price="Scale Up"
+                price="$899"
+                guarantee="Launch guarantee"
                 features={[
                   "Everything in POC Sprint",
                   "Full Production Deployment",
                   "Stripe Payments Integration",
                   "SEO & Analytics Setup",
                   "First Customer Onboarding",
-                  "21-Day Delivery Guarantee"
+                  "28-Day Delivery Guarantee"
                 ]}
                 recommended={true}
               />
@@ -893,15 +1146,12 @@ export default function App() {
             <p className="text-slate-500 max-w-xs text-sm leading-relaxed">
               <strong>ScaleX Studio</strong><br />
               The MVP Agency for the AI Era.<br />
-              San Francisco, CA
             </p>
           </div>
 
           <div className="flex gap-12 text-sm font-bold text-slate-900">
-            <a href="#" className="hover:text-blue-600 transition-colors">Methodology</a>
-            <a href="#" className="hover:text-blue-600 transition-colors">Case Studies</a>
             <a href="#" className="hover:text-blue-600 transition-colors">Twitter</a>
-            <a href="mailto:build@scalex.studio" className="hover:text-blue-600 transition-colors">build@scalex.studio</a>
+            <a href="mailto:admin@scalex.studio" className="hover:text-blue-600 transition-colors">admin@scalex.studio</a>
           </div>
         </div>
         <div className="max-w-7xl mx-auto px-6 mt-16 pt-8 border-t border-slate-200 text-xs text-slate-400 flex justify-between font-mono">
@@ -934,7 +1184,7 @@ export default function App() {
             {/* Iframe Container */}
             <div className="flex-1 min-h-0 bg-white">
               <iframe
-                src="https://cal.com/rishabh-jangid-jvj8qi"
+                src="https://cal.com/adminscalex"
                 className="w-full h-full border-0"
                 title="Book a meeting"
               />
